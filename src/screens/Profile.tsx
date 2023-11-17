@@ -1,4 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -6,18 +7,56 @@ import {
   ButtonIcon,
   ButtonText,
   ArrowLeftIcon,
-  AvatarFallbackText,
-  Avatar,
   Input,
-  InputField,
   SettingsIcon,
 } from '@gluestack-ui/themed';
-import React from 'react';
 import WaterWave from '../components/WaterWave';
-import {ImageBackground} from 'react-native';
+import {ImageBackground, TextInput} from 'react-native';
 import ReversedWaterWave from '../components/ReversedWaterWave';
+import {useSelector} from 'react-redux';
+import {RootState} from '.././store/type/RootState';
+import ListFreeAvatar from '../components/ListFreeAvatar';
+import {API} from '../libs/api';
+import {useDispatch} from 'react-redux';
+import {UPDATE_AVATAR_AND_FULLNAME} from '../store/slice/AuthSlice';
+interface ProfileProps {
+  navigation: any;
+}
 
-export default function Profile({navigation}: any) {
+interface AuthData {}
+
+export default function Profile({navigation}: ProfileProps) {
+  const dispatch = useDispatch();
+
+  const auth: AuthData = useSelector((state: RootState) => state.auth);
+  const [fullname, setFullname] = useState<string>('');
+  const [selectedAvatarId, setSelectedAvatarId] = useState<any>(null);
+
+  const handleChange = (value: string) => {
+    setFullname(value);
+  };
+
+  const handleAvatarClick = (avatarId: any) => {
+    setSelectedAvatarId(avatarId);
+  };
+
+  async function handleRegister() {
+    try {
+      const dataToSend = {
+        ...auth,
+        avatar: selectedAvatarId,
+        fullname: fullname,
+      };
+
+      dispatch(UPDATE_AVATAR_AND_FULLNAME(dataToSend));
+
+      const response = await API.post('/register', dataToSend);
+      console.log('Success', response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   return (
     <ImageBackground
       source={require('../assets/background.png')}
@@ -69,41 +108,20 @@ export default function Profile({navigation}: any) {
               backgroundColor="white"
               width={'100%'}
               height={'60%'}
+              overflow="scroll"
               borderRadius="$2xl"
               padding="$4"
               alignItems="center"
               marginBottom="$2">
-              <View marginBottom="$10">
+              <View marginBottom={'$4'}>
                 <Text>Choose your avatar</Text>
               </View>
-              <View
-                flexDirection="row"
-                flexWrap="wrap"
-                width={'100%'}
-                justifyContent="space-between"
-                gap={10}>
-                <Avatar bgColor="$amber600" size="xl" borderRadius="$full">
-                  <AvatarFallbackText>Sandeep Srivastava</AvatarFallbackText>
-                </Avatar>
-                <Avatar bgColor="$amber600" size="xl" borderRadius="$full">
-                  <AvatarFallbackText>Sandeep Srivastava</AvatarFallbackText>
-                </Avatar>
-                <Avatar bgColor="$amber600" size="xl" borderRadius="$full">
-                  <AvatarFallbackText>Sandeep Srivastava</AvatarFallbackText>
-                </Avatar>
-                <Avatar bgColor="$amber600" size="xl" borderRadius="$full">
-                  <AvatarFallbackText>Sandeep Srivastava</AvatarFallbackText>
-                </Avatar>
-                <Avatar bgColor="$amber600" size="xl" borderRadius="$full">
-                  <AvatarFallbackText>Sandeep Srivastava</AvatarFallbackText>
-                </Avatar>
-                <Avatar bgColor="$amber600" size="xl" borderRadius="$full">
-                  <AvatarFallbackText>Sandeep Srivastava</AvatarFallbackText>
-                </Avatar>
-              </View>
+              <ListFreeAvatar
+                handleAvatarClick={handleAvatarClick}
+                selectedAvatarId={selectedAvatarId}
+              />
             </View>
             <View
-              backgroundColor="white"
               width={'100%'}
               height={'10%'}
               borderRadius="$2xl"
@@ -111,12 +129,19 @@ export default function Profile({navigation}: any) {
               paddingTop={'$1'}
               alignItems="center">
               <Input
+                backgroundColor="white"
+                width={'110%'}
                 size="md"
+                borderRadius="$xl"
                 borderWidth={0}
                 isDisabled={false}
                 isInvalid={false}
                 isReadOnly={false}>
-                <InputField placeholder="Your username.." />
+                <TextInput
+                  placeholder="Your username.."
+                  value={fullname}
+                  onChangeText={handleChange}
+                />
               </Input>
             </View>
           </View>
@@ -130,7 +155,10 @@ export default function Profile({navigation}: any) {
               borderRadius="$2xl"
               isDisabled={false}
               isFocusVisible={false}
-              onPress={() => navigation.navigate('StartGame')}>
+              onPress={() => {
+                handleRegister();
+                navigation.navigate('StartGame');
+              }}>
               <ButtonText>Continue </ButtonText>
             </Button>
           </View>

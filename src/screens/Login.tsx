@@ -1,14 +1,7 @@
+/* eslint-disable @typescript-eslint/no-shadow */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-native/no-inline-styles */
-import {
-  View,
-  Image,
-  Text,
-  Button,
-  ButtonText,
-  ButtonIcon,
-  ArrowLeftIcon,
-  SettingsIcon,
-} from '@gluestack-ui/themed';
+import {View, Image, Text, Button, ButtonText} from '@gluestack-ui/themed';
 import React, {useState} from 'react';
 import logo from '../assets/logo.png';
 import googleIcon from '../assets/google.png';
@@ -17,6 +10,12 @@ import {ImageBackground} from 'react-native';
 import ReversedWaterWave from '../components/ReversedWaterWave';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import auth from '@react-native-firebase/auth';
+import Top from '../components/Top';
+import {useDispatch} from 'react-redux';
+import {AUTH_LOGIN} from '../store/RootReducer';
+import {API} from '../libs/api';
+import {RegisterType} from '../types/User';
+import {useQuery} from '@tanstack/react-query';
 
 GoogleSignin.configure({
   webClientId:
@@ -24,24 +23,66 @@ GoogleSignin.configure({
 });
 
 export default function Login({navigation}: any) {
+  const dispatch = useDispatch();
   const [id, setId] = useState<string | null>(null);
+  const [emailUser, setEmailUser] = useState({
+    email: '',
+    fullname: '',
+    avatar: null,
+  });
+  const [userInfoJSON, setUserInfoJSON] = useState<any>({
+    email: '',
+  });
   async function onGoogleButtonPress() {
-    // Check if your device supports Google Play
-    await GoogleSignin.hasPlayServices({showPlayServicesUpdateDialog: true});
-    // Get the users ID token
-    const {idToken} = await GoogleSignin.signIn();
-    const userInfo = await fetch(
-      `https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${idToken}`,
-    );
-    const userInfoJSON = await userInfo.json();
-    setId(idToken);
-    console.log(userInfoJSON);
-    // Create a Google credential with the token
-    const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+    try {
+      await GoogleSignin.hasPlayServices({showPlayServicesUpdateDialog: true});
+      const {idToken} = await GoogleSignin.signIn();
+      const userInfo = await fetch(
+        `https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${idToken}`,
+      );
+      const fetchedUserInfo = await userInfo.json();
 
-    // Sign-in the user with the credential
-    return auth().signInWithCredential(googleCredential);
+      setId(idToken);
+      setEmailUser({
+        email: fetchedUserInfo.email,
+        fullname: fetchedUserInfo.name,
+        avatar: null,
+      });
+      setUserInfoJSON(fetchedUserInfo.email);
+
+      dispatch(
+        AUTH_LOGIN({
+          email: fetchedUserInfo.email,
+          fullname: fetchedUserInfo.name,
+          avatar: null,
+        }),
+      );
+      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+      await auth().signInWithCredential(googleCredential);
+      navigateToProfile(navigation);
+    } catch (error) {
+      console.log(error);
+    }
   }
+
+  const {data: Users, isPending} = useQuery<RegisterType>({
+    queryKey: ['user'],
+    queryFn: async () => await API.get('/users').then(res => res.data.data),
+  });
+
+  const userEmail = Array.isArray(Users)
+    ? Users.map((user: RegisterType) => user.email)
+    : [];
+
+  const emailTrue = userEmail?.includes(userInfoJSON);
+  const navigateToProfile = (navigation: any) => {
+    if (emailTrue) {
+      navigation.navigate('Profile');
+    } else {
+      navigation.navigate('StartGame');
+    }
+  };
+  console.log('email true', emailTrue);
 
   const logout = async () => {
     try {
@@ -52,11 +93,6 @@ export default function Login({navigation}: any) {
       console.log(error);
     }
   };
-
-  const navigateToProfile = () => {
-    navigation.navigate('Profile');
-  };
-
   return (
     <ImageBackground
       source={require('../assets/background.png')}
@@ -72,90 +108,57 @@ export default function Login({navigation}: any) {
           alignItems="center"
           paddingVertical={60}
           paddingHorizontal={30}>
-          <View
-            display="flex"
-            flexDirection="row"
-            justifyContent="space-between"
-            alignItems="center"
-            width="100%">
-            <Button
-              size="md"
-              variant="solid"
-              action="primary"
-              isDisabled={false}
-              isFocusVisible={false}
-              rounded="$full"
-              width={10}>
-              <ButtonIcon as={ArrowLeftIcon} />
-            </Button>
-            <Text color="white" fontSize={20} fontWeight="bold">
-              WHATW
-            </Text>
-            <Button
-              size="md"
-              variant="solid"
-              action="primary"
-              isDisabled={false}
-              isFocusVisible={false}
-              rounded="$full"
-              width={10}>
-              <ButtonIcon as={SettingsIcon} />
-            </Button>
-          </View>
+          <Top />
           <View>
             <Image source={logo} alt="logo" width={400} height={400} />
           </View>
           <View>
             <View>
-              {id === null ? (
-                <Button
-                  size="md"
-                  variant="solid"
-                  action="primary"
-                  isDisabled={false}
-                  isFocusVisible={false}
-                  onPress={() => {
-                    onGoogleButtonPress().then(() => {
-                      navigateToProfile();
-                    });
-                  }}>
-                  <View display="flex" flexDirection="row" gap={4}>
-                    <Image
-                      source={googleIcon}
-                      alt="Google Icon"
-                      width={20}
-                      height={20}
-                    />
-                    <ButtonText>
-                      <Text color="white" fontSize={16} fontWeight="bold">
-                        Continue with Google
-                      </Text>
-                    </ButtonText>
-                  </View>
-                </Button>
-              ) : (
-                <Button
-                  size="md"
-                  variant="solid"
-                  action="primary"
-                  isDisabled={false}
-                  isFocusVisible={false}
-                  onPress={logout}>
-                  <View display="flex" flexDirection="row" gap={4}>
-                    <Image
-                      source={googleIcon}
-                      alt="Google Icon"
-                      width={20}
-                      height={20}
-                    />
-                    <ButtonText>
-                      <Text color="white" fontSize={16} fontWeight="bold">
-                        Logout
-                      </Text>
-                    </ButtonText>
-                  </View>
-                </Button>
-              )}
+              <Button
+                size="md"
+                variant="solid"
+                action="primary"
+                isDisabled={false}
+                isFocusVisible={false}
+                onPress={() => {
+                  onGoogleButtonPress();
+                }}>
+                <View display="flex" flexDirection="row" gap={4}>
+                  <Image
+                    source={googleIcon}
+                    alt="Google Icon"
+                    width={20}
+                    height={20}
+                  />
+                  <ButtonText>
+                    <Text color="white" fontSize={16} fontWeight="bold">
+                      Register with Google
+                    </Text>
+                  </ButtonText>
+                </View>
+              </Button>
+              <Button
+                size="md"
+                marginTop="$2"
+                variant="solid"
+                action="primary"
+                isDisabled={false}
+                isFocusVisible={false}
+                onPress={() => logout()}>
+                <View display="flex" flexDirection="row" gap={4}>
+                  <Image
+                    source={googleIcon}
+                    alt="Google Icon"
+                    width={20}
+                    height={20}
+                  />
+                  <ButtonText>
+                    <Text color="white" fontSize={16} fontWeight="bold">
+                      Logout
+                    </Text>
+                  </ButtonText>
+                </View>
+              </Button>
             </View>
             <Text color="white" fontSize={10}>
               By continuing, you agree to the terms and privacy

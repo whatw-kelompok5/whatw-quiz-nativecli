@@ -15,8 +15,12 @@ import {ButtonText} from '@gluestack-ui/themed';
 import logo from '../assets/logo.png';
 import {ImageBackground} from 'react-native';
 import ReversedWaterWave from '../components/ReversedWaterWave';
+import {useSelector} from 'react-redux';
+import {RootState} from '../store/type/RootState';
 
 export default function StartGameComponent({navigation}: any) {
+  const auth = useSelector((state: RootState) => state.auth);
+
   return (
     <ImageBackground
       source={require('../assets/background.png')}
@@ -78,7 +82,7 @@ export default function StartGameComponent({navigation}: any) {
               borderRadius={100}
               borderColor="#12486B"
               marginTop={-100}
-              backgroundColor="white"
+              backgroundColor="red"
               justifyContent="center"
               alignItems="center"
               position="relative"
@@ -88,7 +92,7 @@ export default function StartGameComponent({navigation}: any) {
             </View>
             <View marginTop={20}>
               <Text fontWeight="bold" fontSize={20}>
-                Jhon Doe
+                {auth.fullname}
               </Text>
             </View>
             <View position="absolute" margin={50}>

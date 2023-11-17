@@ -10,25 +10,40 @@ import SplashScreenComponent from './src/screens/SplashScreen';
 import Matching from './src/screens/Matching';
 import WinnerComponent from './src/screens/Winner';
 import StartGameComponent from './src/screens/StartGame';
+import {Provider} from 'react-redux';
+import RootReducer from './src/store/RootReducer';
+import {configureStore} from '@reduxjs/toolkit';
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
+const queryClient = new QueryClient();
 
 const Stack = createNativeStackNavigator();
+const store = configureStore({
+  reducer: RootReducer,
+});
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <GluestackUIProvider config={config}>
-        <Stack.Navigator
-          initialRouteName="SplashScreen"
-          screenOptions={{headerShown: false}}>
-          <Stack.Screen name="Login" component={Login} />
-          <Stack.Screen name="Profile" component={Profile} />
-          <Stack.Screen name="Task" component={Task} />
-          <Stack.Screen name="StartGame" component={StartGameComponent} />
-          <Stack.Screen name="Winner" component={WinnerComponent} />
-          <Stack.Screen name="Matching" component={Matching} />
-          <Stack.Screen name="SplashScreen" component={SplashScreenComponent} />
-        </Stack.Navigator>
-      </GluestackUIProvider>
-    </NavigationContainer>
+    <QueryClientProvider client={queryClient}>
+      <Provider store={store}>
+        <NavigationContainer>
+          <GluestackUIProvider config={config}>
+            <Stack.Navigator
+              initialRouteName="SplashScreen"
+              screenOptions={{headerShown: false}}>
+              <Stack.Screen name="Login" component={Login} />
+              <Stack.Screen name="Profile" component={Profile} />
+              <Stack.Screen name="Task" component={Task} />
+              <Stack.Screen name="StartGame" component={StartGameComponent} />
+              <Stack.Screen name="Winner" component={WinnerComponent} />
+              <Stack.Screen name="Matching" component={Matching} />
+              <Stack.Screen
+                name="SplashScreen"
+                component={SplashScreenComponent}
+              />
+            </Stack.Navigator>
+          </GluestackUIProvider>
+        </NavigationContainer>
+      </Provider>
+    </QueryClientProvider>
   );
 }
