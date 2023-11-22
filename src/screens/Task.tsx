@@ -1,13 +1,13 @@
 /* eslint-disable react-native/no-inline-styles */
 import {ButtonIcon, ButtonText, View} from '@gluestack-ui/themed';
 import React from 'react';
-import WaterWave from '../components/WaterWave';
+import WaterWave from '../feature/background/WaterWave';
 import Diamond from '../components/Diamond';
 import {Button} from '@gluestack-ui/themed';
 import {ArrowLeftIcon} from '@gluestack-ui/themed';
 import {Text} from '@gluestack-ui/themed';
 import {ImageBackground} from 'react-native';
-import ReversedWaterWave from '../components/ReversedWaterWave';
+import ReversedWaterWave from '../feature/background/ReversedWaterWave';
 
 export default function Task({navigation}: any) {
   const [currentQuestion, setCurrentQuestion] = React.useState(0);
@@ -92,7 +92,7 @@ export default function Task({navigation}: any) {
               onPress={() => navigation.goBack()}>
               <ButtonIcon as={ArrowLeftIcon} />
             </Button>
-            <View></View>
+            <View />
             <View position="absolute" right={10}>
               <View
                 backgroundColor="white"

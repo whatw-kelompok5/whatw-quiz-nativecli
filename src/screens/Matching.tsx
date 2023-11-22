@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
 import {
   View,
@@ -47,7 +48,7 @@ const Matching = ({navigation}: any) => {
         </Text>
         <CountDown
           size={50}
-          until={0}
+          until={60}
           onFinish={() => navigation.navigate('Task')}
           digitStyle={{backgroundColor: 'transparent'}}
           digitTxtStyle={{color: '#FFA33C'}}

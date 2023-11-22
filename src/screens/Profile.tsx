@@ -4,31 +4,34 @@ import {
   View,
   Text,
   Button,
-  ButtonIcon,
   ButtonText,
-  ArrowLeftIcon,
   Input,
-  SettingsIcon,
+  InputIcon,
 } from '@gluestack-ui/themed';
-import WaterWave from '../components/WaterWave';
-import {ImageBackground, TextInput} from 'react-native';
-import ReversedWaterWave from '../components/ReversedWaterWave';
+import {ImageBackground} from 'react-native';
 import {useSelector} from 'react-redux';
 import {RootState} from '.././store/type/RootState';
 import ListFreeAvatar from '../components/ListFreeAvatar';
 import {API} from '../libs/api';
 import {useDispatch} from 'react-redux';
 import {UPDATE_AVATAR_AND_FULLNAME} from '../store/slice/AuthSlice';
-interface ProfileProps {
-  navigation: any;
-}
+import ReversedWaterWave from '../feature/background/ReversedWaterWave';
+import WaterWave from '../feature/background/WaterWave';
+import {useAuth} from '../hooks/useAuth';
+import StartGameComponent from './StartGame';
+import {InputSlot} from '@gluestack-ui/themed';
+import {AtSignIcon} from '@gluestack-ui/themed';
+import {InputField} from '@gluestack-ui/themed';
 
-interface AuthData {}
-
-export default function Profile({navigation}: ProfileProps) {
+export default function Profile({navigation}: any) {
   const dispatch = useDispatch();
 
-  const auth: AuthData = useSelector((state: RootState) => state.auth);
+  const auth = useSelector((state: RootState) => state.auth);
+  const {Users} = useAuth({navigation});
+  const userLogin = Array.isArray(Users)
+    ? Users.filter((user: any) => user.email === auth.email)
+    : [];
+  const dataUserLogin = userLogin[0];
   const [fullname, setFullname] = useState<string>('');
   const [selectedAvatarId, setSelectedAvatarId] = useState<any>(null);
 
@@ -57,6 +60,10 @@ export default function Profile({navigation}: ProfileProps) {
     }
   }
 
+  if (dataUserLogin !== undefined) {
+    return <StartGameComponent navigation={navigation} />;
+  }
+
   return (
     <ImageBackground
       source={require('../assets/background.png')}
@@ -72,37 +79,6 @@ export default function Profile({navigation}: ProfileProps) {
           alignItems="center"
           paddingVertical={60}
           paddingHorizontal={30}>
-          <View
-            display="flex"
-            flexDirection="row"
-            justifyContent="space-between"
-            alignItems="center"
-            width="100%">
-            <Button
-              size="md"
-              variant="solid"
-              action="primary"
-              isDisabled={false}
-              isFocusVisible={false}
-              rounded="$full"
-              width={10}
-              onPress={() => navigation.goBack()}>
-              <ButtonIcon as={ArrowLeftIcon} />
-            </Button>
-            <Text color="white" fontSize={20} fontWeight="bold">
-              WHATW
-            </Text>
-            <Button
-              size="md"
-              variant="solid"
-              action="primary"
-              isDisabled={false}
-              isFocusVisible={false}
-              rounded="$full"
-              width={10}>
-              <ButtonIcon as={SettingsIcon} />
-            </Button>
-          </View>
           <View width={'100%'} height={'70%'}>
             <View
               backgroundColor="white"
@@ -128,17 +104,12 @@ export default function Profile({navigation}: ProfileProps) {
               paddingHorizontal="$4"
               paddingTop={'$1'}
               alignItems="center">
-              <Input
-                backgroundColor="white"
-                width={'110%'}
-                size="md"
-                borderRadius="$xl"
-                borderWidth={0}
-                isDisabled={false}
-                isInvalid={false}
-                isReadOnly={false}>
-                <TextInput
-                  placeholder="Your username.."
+              <Input backgroundColor="white" width={'110%'} borderRadius="$xl">
+                <InputSlot pl="$3">
+                  <InputIcon as={AtSignIcon} />
+                </InputSlot>
+                <InputField
+                  placeholder="Search..."
                   value={fullname}
                   onChangeText={handleChange}
                 />

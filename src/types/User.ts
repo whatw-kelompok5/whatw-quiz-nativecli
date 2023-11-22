@@ -1,5 +1,7 @@
+import {AvatarType} from './Avatar';
+
 export type RegisterType = {
   fullname: string;
   email: string;
-  avatar: number | null;
+  avatar: AvatarType | null;
 };

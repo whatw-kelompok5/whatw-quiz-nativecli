@@ -1,27 +1,30 @@
 /* eslint-disable react-native/no-inline-styles */
-import {
-  Button,
-  View,
-  ButtonIcon,
-  Text,
-  ArrowLeftIcon,
-  Image,
-} from '@gluestack-ui/themed';
+import {Button, View, Text, Image} from '@gluestack-ui/themed';
 import React from 'react';
-import WaterWave from '../components/WaterWave';
 import Diamond from '../components/Diamond';
 import ChangeAvatar from '../components/ChangeAvatar';
 import {ButtonText} from '@gluestack-ui/themed';
 import logo from '../assets/logo.png';
 import {ImageBackground} from 'react-native';
-import ReversedWaterWave from '../components/ReversedWaterWave';
 import {useSelector} from 'react-redux';
+import {useAuth} from '../hooks/useAuth';
 import {RootState} from '../store/type/RootState';
-
+import ReversedWaterWave from '../feature/background/ReversedWaterWave';
+import WaterWave from '../feature/background/WaterWave';
+import Setting from '../feature/top/Setting';
 export default function StartGameComponent({navigation}: any) {
   const auth = useSelector((state: RootState) => state.auth);
-
-  return (
+  const {Users, logout} = useAuth({navigation});
+  const userLogin = Array.isArray(Users)
+    ? Users.filter((user: any) => user.email === auth.email)
+    : [];
+  const dataUserLogin = userLogin[0];
+  console.log(dataUserLogin);
+  // if (!dataUserLogin) {
+  //   logout();
+  //   navigation.navigate('Login');
+  // }
+  return dataUserLogin ? (
     <ImageBackground
       source={require('../assets/background.png')}
       style={{flex: 1}}>
@@ -34,7 +37,7 @@ export default function StartGameComponent({navigation}: any) {
           backgroundColor="transparent"
           justifyContent="space-between"
           alignItems="center"
-          paddingTop={60}>
+          paddingTop={30}>
           <View
             display="flex"
             flexDirection="row"
@@ -42,17 +45,7 @@ export default function StartGameComponent({navigation}: any) {
             alignItems="center"
             width="100%"
             paddingHorizontal={30}>
-            <Button
-              size="md"
-              variant="solid"
-              action="primary"
-              isDisabled={false}
-              isFocusVisible={false}
-              rounded="$full"
-              width={10}
-              onPress={() => navigation.goBack()}>
-              <ButtonIcon as={ArrowLeftIcon} />
-            </Button>
+            <Setting navigation={navigation} />
             <View />
             <View position="absolute" right={10}>
               <View
@@ -71,28 +64,30 @@ export default function StartGameComponent({navigation}: any) {
           <View
             backgroundColor="white"
             width={'100%'}
-            height={600}
+            height={'75%'}
             borderTopLeftRadius="$2xl"
             borderTopRightRadius="$2xl"
             alignItems="center">
-            <View
+            <Image
               borderWidth={10}
               width={200}
               height={200}
               borderRadius={100}
-              borderColor="#12486B"
+              borderColor="white"
+              source={dataUserLogin.avatar.image}
+              alt="avatar"
               marginTop={-100}
               backgroundColor="red"
               justifyContent="center"
               alignItems="center"
               position="relative"
             />
-            <View position="absolute" top={-100} right={100}>
+            <View position="absolute" top={-85} right={80} zIndex={999}>
               <ChangeAvatar />
             </View>
             <View marginTop={20}>
               <Text fontWeight="bold" fontSize={20}>
-                {auth.fullname}
+                {dataUserLogin.fullname}
               </Text>
             </View>
             <View position="absolute" margin={50}>
@@ -117,5 +112,5 @@ export default function StartGameComponent({navigation}: any) {
         </View>
       </View>
     </ImageBackground>
-  );
+  ) : null;
 }

@@ -4,8 +4,8 @@ import {View, Image} from '@gluestack-ui/themed';
 import {ImageBackground} from 'react-native';
 import logo from '../assets/logo.png';
 import SplashScreen from 'react-native-splash-screen';
-import ReversedWaterWave from '../components/ReversedWaterWave';
-import WaterWave from '../components/WaterWave';
+import ReversedWaterWave from '../feature/background/ReversedWaterWave';
+import WaterWave from '../feature/background/WaterWave';
 
 export default function SplashScreenComponent({navigation}: any) {
   setTimeout(() => {

@@ -15,8 +15,24 @@ import {
 } from '@gluestack-ui/themed';
 import React, {useState} from 'react';
 import diamond from '../assets/diamond.png';
+import {useQuery} from '@tanstack/react-query';
+import {RegisterType} from '../types/User';
+import {API} from '../libs/api';
+import {useSelector} from 'react-redux';
+import {RootState} from '../store/type/RootState';
 
 export default function Diamond() {
+  const auth = useSelector((state: RootState) => state.auth);
+
+  const {data: Users} = useQuery<RegisterType>({
+    queryKey: ['user'],
+    queryFn: async () => await API.get('/users').then(res => res.data.data),
+  });
+  const userLogin = Array.isArray(Users)
+    ? Users.filter((user: any) => user.email === auth.email)
+    : [];
+  const dataUserLogin = userLogin[0];
+
   const avatar = [
     {
       id: 1,
@@ -79,7 +95,7 @@ export default function Diamond() {
           marginRight={6}
         />
         <ButtonText color="black" fontSize={15} marginRight={6}>
-          999
+          {dataUserLogin?.diamond}
         </ButtonText>
         <Center h={300}>
           <Button
@@ -99,7 +115,7 @@ export default function Diamond() {
             }}>
             <ModalBackdrop />
             <ModalContent>
-              <ModalHeader></ModalHeader>
+              <ModalHeader />
               <ModalBody>
                 <View
                   backgroundColor="transparent"

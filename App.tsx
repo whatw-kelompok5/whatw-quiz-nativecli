@@ -14,6 +14,7 @@ import {Provider} from 'react-redux';
 import RootReducer from './src/store/RootReducer';
 import {configureStore} from '@reduxjs/toolkit';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
+import Setting from './src/feature/top/Setting';
 const queryClient = new QueryClient();
 
 const Stack = createNativeStackNavigator();
@@ -31,6 +32,7 @@ export default function App() {
               initialRouteName="SplashScreen"
               screenOptions={{headerShown: false}}>
               <Stack.Screen name="Login" component={Login} />
+              <Stack.Screen name="Setting" component={Setting} />
               <Stack.Screen name="Profile" component={Profile} />
               <Stack.Screen name="Task" component={Task} />
               <Stack.Screen name="StartGame" component={StartGameComponent} />

@@ -14,7 +14,7 @@ export const authSlice = createSlice({
   initialState: initialState,
   reducers: {
     AUTH_LOGIN: (_, action) => {
-      const payload = action.payload;
+      const payload: any = action.payload;
 
       setAuthToken(payload.token);
       AsyncStorage.setItem('token', payload.token);
