@@ -1,6 +1,14 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable react-native/no-inline-styles */
-import {View, Image, Text, Button, ButtonText} from '@gluestack-ui/themed';
+import {
+  View,
+  Image,
+  Text,
+  Button,
+  ButtonText,
+  Toast,
+  VStack,
+  ToastTitle,
+  ToastDescription,
+} from '@gluestack-ui/themed';
 import React, {useState} from 'react';
 import logo from '../assets/logo.png';
 import googleIcon from '../assets/google.png';
@@ -8,9 +16,8 @@ import {ImageBackground} from 'react-native';
 import {useAuth} from '../hooks/useAuth';
 import ReversedWaterWave from '../feature/background/ReversedWaterWave';
 import WaterWave from '../feature/background/WaterWave';
-
 export default function Login({navigation}: any) {
-  const {onGoogleButtonPress} = useAuth({navigation});
+  const {onGoogleButtonPress, handleLogin} = useAuth({navigation});
   return (
     <ImageBackground
       source={require('../assets/background.png')}
@@ -38,7 +45,7 @@ export default function Login({navigation}: any) {
                 isDisabled={false}
                 isFocusVisible={false}
                 onPress={() => {
-                  onGoogleButtonPress();
+                  handleLogin();
                 }}>
                 <View display="flex" flexDirection="row" gap={4}>
                   <Image

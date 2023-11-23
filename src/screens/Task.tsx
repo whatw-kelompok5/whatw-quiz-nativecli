@@ -1,18 +1,18 @@
-/* eslint-disable react-native/no-inline-styles */
-import {ButtonIcon, ButtonText, View} from '@gluestack-ui/themed';
-import React from 'react';
-import WaterWave from '../feature/background/WaterWave';
-import Diamond from '../components/Diamond';
-import {Button} from '@gluestack-ui/themed';
-import {ArrowLeftIcon} from '@gluestack-ui/themed';
-import {Text} from '@gluestack-ui/themed';
+import React, {useEffect, useRef} from 'react';
+import {Button, ButtonText, View, Text, ButtonIcon} from '@gluestack-ui/themed';
 import {ImageBackground} from 'react-native';
+import CountDown from 'react-native-countdown-component';
+import Diamond from '../components/Diamond';
+import WaterWave from '../feature/background/WaterWave';
 import ReversedWaterWave from '../feature/background/ReversedWaterWave';
 
 export default function Task({navigation}: any) {
   const [currentQuestion, setCurrentQuestion] = React.useState(0);
   const [score, setScore] = React.useState(0);
   const [showScore, setShowScore] = React.useState(false);
+  const [timePerQuestion, setTimePerQuestion] = React.useState(10);
+  const [timerKey, setTimerKey] = React.useState(0);
+  const [selectedOption, setSelectedOption] = React.useState('');
 
   const quizData = [
     {
@@ -50,23 +50,62 @@ export default function Task({navigation}: any) {
   const handleAnswer = (selectedAnswer: string) => {
     const answer = quizData[currentQuestion].answer;
     if (answer === selectedAnswer) {
-      setScore(prevScore => prevScore + 20);
+      const timeLeftScore = timePerQuestion * 5;
+      setScore(prevScore => prevScore + timeLeftScore);
     }
 
     const nextQuestion = currentQuestion + 1;
     if (nextQuestion < quizData.length) {
-      setCurrentQuestion(nextQuestion);
+      setTimeout(() => {
+        setCurrentQuestion(nextQuestion);
+        setTimePerQuestion(10);
+      }, 1000);
     } else {
       setShowScore(true);
     }
   };
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+
+    const startCountdown = () => {
+      interval = setInterval(() => {
+        setTimePerQuestion(prevTime => {
+          if (prevTime === 0) {
+            clearInterval(interval!);
+            handleTimeUp();
+            return prevTime;
+          }
+          return prevTime - 1;
+        });
+      }, 1000);
+    };
+
+    const handleTimeUp = () => {
+      const nextQuestion = currentQuestion + 1;
+      if (nextQuestion < quizData.length) {
+        setCurrentQuestion(nextQuestion);
+        setTimePerQuestion(10);
+      } else {
+        setShowScore(true);
+      }
+    };
+
+    if (!showScore && timePerQuestion > 0) {
+      startCountdown();
+    } else if (!showScore && timePerQuestion === 0) {
+      handleTimeUp();
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [currentQuestion, showScore, quizData.length, timePerQuestion]);
+
   return (
     <ImageBackground
       source={require('../assets/background.png')}
       style={{flex: 1}}>
       <View style={{flex: 1, position: 'relative'}}>
-        <ReversedWaterWave />
-        <WaterWave />
         <View
           width={'100%'}
           height={'100%'}
@@ -81,17 +120,7 @@ export default function Task({navigation}: any) {
             alignItems="center"
             width="100%"
             paddingHorizontal={30}>
-            <Button
-              size="md"
-              variant="solid"
-              action="primary"
-              isDisabled={false}
-              isFocusVisible={false}
-              rounded="$full"
-              width={10}
-              onPress={() => navigation.goBack()}>
-              <ButtonIcon as={ArrowLeftIcon} />
-            </Button>
+            <View />
             <View />
             <View position="absolute" right={10}>
               <View
@@ -110,10 +139,12 @@ export default function Task({navigation}: any) {
           <View
             backgroundColor="white"
             width={'100%'}
-            height={600}
+            height="85%"
             borderTopLeftRadius="$2xl"
             borderTopRightRadius="$2xl"
             alignItems="center">
+            <WaterWave />
+            <ReversedWaterWave />
             <View
               borderWidth={10}
               width={300}
@@ -124,9 +155,17 @@ export default function Task({navigation}: any) {
               backgroundColor="white"
               justifyContent="center"
               alignItems="center">
-              <Text fontWeight="bold" fontSize={20}>
-                18:00
-              </Text>
+              <CountDown
+                key={timerKey}
+                until={timePerQuestion}
+                size={20}
+                onFinish={() => setTimePerQuestion(0)}
+                digitStyle={{backgroundColor: 'white'}}
+                digitTxtStyle={{color: '#12486B'}}
+                timeToShow={['M', 'S']}
+                timeLabels={{m: '', s: ''}}
+                showSeparator
+              />
             </View>
             {showScore ? (
               <View
@@ -145,8 +184,8 @@ export default function Task({navigation}: any) {
                   marginBottom={60}>
                   {score}
                 </Text>
-                <Button onPress={() => navigation.navigate('Winner')}>
-                  <ButtonText>Continue</ButtonText>
+                <Button onPress={() => navigation.navigate('StartGame')}>
+                  <Text color='white'>Continue</Text>
                 </Button>
               </View>
             ) : (
@@ -157,32 +196,43 @@ export default function Task({navigation}: any) {
                 justifyContent="center"
                 height={'100%'}
                 marginTop={-40}>
-                <Text>question :</Text>
+                <Text marginTop={20}>question :</Text>
                 <Text fontWeight="bold" fontSize={20} marginBottom={20}>
                   {quizData[currentQuestion].question}
                 </Text>
                 {quizData[currentQuestion].options.map((option, index) => (
-                  <View>
+                  <View key={index}>
                     <Button
                       key={index}
                       size="md"
                       height={60}
                       variant="solid"
+                      backgroundColor={
+                        selectedOption === option
+                          ? option === quizData[currentQuestion].answer
+                            ? 'green'
+                            : 'red'
+                          : '#12486B'
+                      }
                       action="primary"
                       isDisabled={false}
                       isFocusVisible={false}
                       rounded="$full"
                       width={300}
                       marginTop={10}
-                      onPress={() => handleAnswer(option)}>
+                      onPress={() => {
+                        setSelectedOption(option);
+                        handleAnswer(option);
+                      }}>
                       <ButtonText>{option}</ButtonText>
                     </Button>
                   </View>
                 ))}
+
                 <View
                   backgroundColor="#12486B"
                   width={100}
-                  height={80}
+                  height={60}
                   borderRadius={20}
                   borderColor="#12486B"
                   marginTop={30}

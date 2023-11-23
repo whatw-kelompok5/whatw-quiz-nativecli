@@ -1,11 +1,11 @@
 /* eslint-disable react-native/no-inline-styles */
-import {Button, View, Text, Image} from '@gluestack-ui/themed';
-import React from 'react';
+import {Button, View, Text, Image, Spinner} from '@gluestack-ui/themed';
+import React, {useState, useEffect} from 'react';
 import Diamond from '../components/Diamond';
 import ChangeAvatar from '../components/ChangeAvatar';
 import {ButtonText} from '@gluestack-ui/themed';
 import logo from '../assets/logo.png';
-import {ImageBackground} from 'react-native';
+import {Alert, ImageBackground} from 'react-native';
 import {useSelector} from 'react-redux';
 import {useAuth} from '../hooks/useAuth';
 import {RootState} from '../store/type/RootState';
@@ -13,18 +13,33 @@ import ReversedWaterWave from '../feature/background/ReversedWaterWave';
 import WaterWave from '../feature/background/WaterWave';
 import Setting from '../feature/top/Setting';
 export default function StartGameComponent({navigation}: any) {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setIsLoading(false);
+    }, 3000);
+
+    return () => clearTimeout(timeout);
+  }, []);
+
   const auth = useSelector((state: RootState) => state.auth);
-  const {Users, logout} = useAuth({navigation});
+  const {Users} = useAuth({navigation});
   const userLogin = Array.isArray(Users)
     ? Users.filter((user: any) => user.email === auth.email)
     : [];
   const dataUserLogin = userLogin[0];
-  console.log(dataUserLogin);
-  // if (!dataUserLogin) {
-  //   logout();
-  //   navigation.navigate('Login');
-  // }
-  return dataUserLogin ? (
+
+  useEffect(() => {
+    if (!isLoading && !dataUserLogin) {
+      Alert.alert('Error connection', 'Please login again');
+      navigation.navigate('Login');
+    }
+  }, [isLoading, dataUserLogin, navigation]);
+
+  return isLoading ? (
+    <Spinner size="large" />
+  ) : (
     <ImageBackground
       source={require('../assets/background.png')}
       style={{flex: 1}}>
@@ -112,5 +127,5 @@ export default function StartGameComponent({navigation}: any) {
         </View>
       </View>
     </ImageBackground>
-  ) : null;
+  );
 }

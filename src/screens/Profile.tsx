@@ -27,7 +27,7 @@ export default function Profile({navigation}: any) {
   const dispatch = useDispatch();
 
   const auth = useSelector((state: RootState) => state.auth);
-  const {Users} = useAuth({navigation});
+  const {Users, login, logout} = useAuth({navigation});
   const userLogin = Array.isArray(Users)
     ? Users.filter((user: any) => user.email === auth.email)
     : [];
@@ -54,9 +54,13 @@ export default function Profile({navigation}: any) {
       dispatch(UPDATE_AVATAR_AND_FULLNAME(dataToSend));
 
       const response = await API.post('/register', dataToSend);
-      console.log('Success', response.data);
+      console.log('Register success', response.data);
+      login();
+      navigation.navigate('StartGame');
     } catch (error) {
-      console.log(error);
+      console.log('Register error', error);
+      logout()
+      navigation.navigate('Login');
     }
   }
 

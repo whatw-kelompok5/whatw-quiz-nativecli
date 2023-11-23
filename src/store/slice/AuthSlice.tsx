@@ -6,7 +6,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const initialState: RegisterType = {
   fullname: '',
   email: '',
-  avatar: null,
+  avatar:
+    {
+      id: 0,
+      image: '',
+    } || null,
 };
 
 export const authSlice = createSlice({
@@ -26,6 +30,17 @@ export const authSlice = createSlice({
       };
       return user;
     },
+    AUTH_REGISTER: (_, action) => {
+      const payload: any = action.payload;
+
+      setAuthToken(payload.token);
+      AsyncStorage.setItem('token', payload.token);
+
+      const user: any = {
+        email: payload.email,
+      };
+      return user;
+    },
     AUTH_CHECK: (_, action) => {
       const payload = action.payload;
       const user: RegisterType = {
@@ -37,7 +52,6 @@ export const authSlice = createSlice({
     },
     AUTH_LOGOUT: () => {
       AsyncStorage.removeItem('token');
-      return initialState;
     },
     UPDATE_AVATAR_AND_FULLNAME: (state, action) => {
       const {avatar, fullname} = action.payload;
