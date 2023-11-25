@@ -1,40 +1,72 @@
-/* eslint-disable react-native/no-inline-styles */
-import React from 'react';
-import {View, Image} from '@gluestack-ui/themed';
-import {ImageBackground} from 'react-native';
-import logo from '../assets/logo.png';
-import SplashScreen from 'react-native-splash-screen';
-import ReversedWaterWave from '../feature/background/ReversedWaterWave';
-import WaterWave from '../feature/background/WaterWave';
-
+import React, {useState, useEffect, useRef} from 'react';
+import {
+  Animated,
+  TouchableOpacity,
+  ImageBackground,
+} from 'react-native';
+import LottieView from 'lottie-react-native';
+import { Text } from '@gluestack-ui/themed';
 export default function SplashScreenComponent({navigation}: any) {
-  setTimeout(() => {
-    if (SplashScreen) {
-      SplashScreen.hide();
-    }
-    navigation.navigate('Login');
-  }, 3000);
+  const [bounceValue] = useState(new Animated.Value(0));
+  const opacity = useRef(new Animated.Value(0.1)).current;
+
+  const startOpacityAnimation = () => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration: 2200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacity, {
+          toValue: 0.1,
+          duration: 1500,
+          useNativeDriver: true,
+        }),
+      ]),
+      {iterations: -1},
+    ).start();
+  };
+
+  useEffect(() => {
+    startOpacityAnimation();
+  }, []);
+
+  const translateY = bounceValue.interpolate({
+    inputRange: [5, 8],
+    outputRange: [8, 10],
+  });
+
   return (
     <ImageBackground
-      source={require('../assets/background.png')}
-      style={{flex: 1}}>
-      <View style={{flex: 1, position: 'relative'}}>
-        <ReversedWaterWave />
-        <WaterWave />
-        <View
-          width={'100%'}
-          height={'100%'}
-          backgroundColor="transparent"
-          position="absolute"
-          top={200}
-          alignItems="center"
-          paddingVertical={60}
-          paddingHorizontal={30}>
-          <View>
-            <Image source={logo} alt="logo" width={400} height={400} />
-          </View>
-        </View>
-      </View>
+      source={require('../assets/images/background-image.jpg')}
+      style={{
+        flex: 1,
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 60,
+      }}>
+      <Text color='white' fontWeight='bold'>WHATW</Text>
+      <LottieView
+        source={require('../assets/lottie/Animation - Global.json')}
+        autoPlay
+        loop
+        style={{width: 350, height: 350}}
+      />
+      <Animated.View
+        style={{transform: [{translateY}]}}>
+        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+          <Animated.Text
+            style={{
+              fontSize: 18,
+              fontWeight: 'bold',
+              color: 'white',
+              opacity: opacity,
+            }}>
+            Tap to continue
+          </Animated.Text>
+        </TouchableOpacity>
+      </Animated.View>
     </ImageBackground>
   );
 }

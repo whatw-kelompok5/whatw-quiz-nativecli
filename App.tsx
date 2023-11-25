@@ -15,13 +15,14 @@ import RootReducer from './src/store/RootReducer';
 import {configureStore} from '@reduxjs/toolkit';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import Setting from './src/feature/top/Setting';
+import {AppRegistry, LogBox} from 'react-native';
 const queryClient = new QueryClient();
-
+AppRegistry.registerComponent('App', () => App);
 const Stack = createNativeStackNavigator();
 const store = configureStore({
   reducer: RootReducer,
 });
-
+LogBox.ignoreAllLogs();
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>

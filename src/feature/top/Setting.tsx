@@ -32,7 +32,7 @@ const Setting = ({navigation}: any) => {
     <Center>
       <Button
         size="md"
-        backgroundColor="white"
+        backgroundColor="#12486B"
         variant="solid"
         action="primary"
         isDisabled={false}
@@ -43,7 +43,7 @@ const Setting = ({navigation}: any) => {
           setShowModal(true);
         }}
         ref={ref}>
-        <ButtonIcon as={SettingsIcon} color="#12486B" />
+        <ButtonIcon as={SettingsIcon} color="white" />
       </Button>
       <Modal
         isOpen={showModal}

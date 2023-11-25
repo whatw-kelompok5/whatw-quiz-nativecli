@@ -42,11 +42,16 @@ export default function ChangeAvatar({navigation}: any) {
         avatar: selectedAvatarId,
         fullname: dataUserLogin.fullname,
       };
+      const headers = {
+        Authorization: `Bearer ${auth.token}`,
+      };
 
-      dispatch(UPDATE_AVATAR_AND_FULLNAME(dataToSend));
-
-      const response = await API.patch('/user', dataToSend);
-      console.log('Success', response.data);
+      const response = await API.patch('/user', dataToSend, {headers});
+      console.log('Success change avatar', response.data);
+      dispatch({
+        type: UPDATE_AVATAR_AND_FULLNAME,
+        payload: response.data.data,
+      });
     } catch (error) {
       console.log(error);
     }

@@ -15,7 +15,7 @@ GoogleSignin.configure({
 export function useAuth({navigation}: any) {
   const dispatch = useDispatch();
   const [id, setId] = useState<string | null>(null);
-  const [emailUser, setEmailUser] = useState<RegisterType>({
+  const [emailUser, setEmailUser] = useState<any>({
     email: '',
     fullname: '',
     avatar: {
@@ -27,21 +27,9 @@ export function useAuth({navigation}: any) {
     email: '',
   });
 
-  const {data: Users} = useQuery<RegisterType>({
+  const {data: Users} = useQuery<any>({
     queryKey: ['user'],
     queryFn: async () => await API.get('/users').then(res => res.data.data),
-  });
-
-  const userLogin = Array.isArray(Users)
-    ? Users.filter((user: any) => user.email === emailUser.email)
-    : [];
-
-  let userFullname: any = '';
-  let userAvatar: any = '';
-
-  userLogin.map((e: any) => {
-    userFullname = e.fullname;
-    userAvatar = e.avatar;
   });
   async function onGoogleButtonPress() {
     try {
@@ -87,6 +75,7 @@ export function useAuth({navigation}: any) {
             id: 0,
             image: '',
           },
+          diamond: 0,
         }),
       );
       const response = await API.post('/login', {
@@ -96,9 +85,11 @@ export function useAuth({navigation}: any) {
       if (userData) {
         dispatch(
           AUTH_LOGIN({
+            token: response.data.token,
             email: fetchedUserInfo.email,
             fullname: userData.fullname,
             avatar: userData.avatar,
+            diamond: userData.diamond,
           }),
         );
         navigation.navigate('StartGame');
@@ -111,12 +102,16 @@ export function useAuth({navigation}: any) {
     }
   }
 
+  const emailFound = Users?.some(
+    (user: {email: any}) => user.email === emailUser.email,
+  );
   async function handleLogin() {
-    if (emailUser.fullname === '') {
+    if (emailFound) {
       await onGoogleButtonPress();
-      navigation.navigate('Profile');
+      navigation.navigate('StartGame');
     } else {
       await login();
+      navigation.navigate('Profile');
     }
   }
   const logout = async () => {

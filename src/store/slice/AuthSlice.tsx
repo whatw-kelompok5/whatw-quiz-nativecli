@@ -4,6 +4,7 @@ import {RegisterType} from '../../types/User';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const initialState: RegisterType = {
+  token: '',
   fullname: '',
   email: '',
   avatar:
@@ -11,6 +12,7 @@ const initialState: RegisterType = {
       id: 0,
       image: '',
     } || null,
+  diamond: 0,
 };
 
 export const authSlice = createSlice({
@@ -24,9 +26,11 @@ export const authSlice = createSlice({
       AsyncStorage.setItem('token', payload.token);
 
       const user: RegisterType = {
+        token: payload.token,
         fullname: payload.fullname,
         email: payload.email,
         avatar: payload.avatar,
+        diamond: payload.diamond,
       };
       return user;
     },
@@ -44,9 +48,11 @@ export const authSlice = createSlice({
     AUTH_CHECK: (_, action) => {
       const payload = action.payload;
       const user: RegisterType = {
+        token: payload.token,
         fullname: payload.fullname,
         email: payload.email,
         avatar: payload.avatar,
+        diamond: payload.diamond,
       };
       return user;
     },

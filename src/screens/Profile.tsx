@@ -1,31 +1,26 @@
-/* eslint-disable react-native/no-inline-styles */
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
   Button,
-  ButtonText,
   Input,
-  InputIcon,
+  KeyboardAvoidingView,
+  AtSignIcon,
 } from '@gluestack-ui/themed';
-import {ImageBackground} from 'react-native';
-import {useSelector} from 'react-redux';
-import {RootState} from '.././store/type/RootState';
+import {Keyboard, Platform, ImageBackground} from 'react-native';
+import {useSelector, useDispatch} from 'react-redux';
+import {RootState} from '../store/type/RootState';
 import ListFreeAvatar from '../components/ListFreeAvatar';
 import {API} from '../libs/api';
-import {useDispatch} from 'react-redux';
 import {UPDATE_AVATAR_AND_FULLNAME} from '../store/slice/AuthSlice';
 import ReversedWaterWave from '../feature/background/ReversedWaterWave';
 import WaterWave from '../feature/background/WaterWave';
 import {useAuth} from '../hooks/useAuth';
 import StartGameComponent from './StartGame';
-import {InputSlot} from '@gluestack-ui/themed';
-import {AtSignIcon} from '@gluestack-ui/themed';
-import {InputField} from '@gluestack-ui/themed';
+import {InputSlot, InputIcon, InputField} from '@gluestack-ui/themed';
 
 export default function Profile({navigation}: any) {
   const dispatch = useDispatch();
-
   const auth = useSelector((state: RootState) => state.auth);
   const {Users, login, logout} = useAuth({navigation});
   const userLogin = Array.isArray(Users)
@@ -59,7 +54,7 @@ export default function Profile({navigation}: any) {
       navigation.navigate('StartGame');
     } catch (error) {
       console.log('Register error', error);
-      logout()
+      logout();
       navigation.navigate('Login');
     }
   }
@@ -70,45 +65,47 @@ export default function Profile({navigation}: any) {
 
   return (
     <ImageBackground
-      source={require('../assets/background.png')}
+      source={require('../assets/images/background-image.jpg')}
       style={{flex: 1}}>
-      <View style={{flex: 1, position: 'relative'}}>
         <ReversedWaterWave />
         <WaterWave />
         <View
-          width={'100%'}
-          height={'100%'}
-          backgroundColor="transparent"
-          justifyContent="space-between"
-          alignItems="center"
-          paddingVertical={60}
-          paddingHorizontal={30}>
-          <View width={'100%'} height={'70%'}>
+          style={{
+            flex: 1,
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingVertical: 40,
+            paddingHorizontal: 20,
+          }}>
+          <View style={{flex: 1, width: '100%', marginBottom: 20}}>
             <View
-              backgroundColor="white"
-              width={'100%'}
-              height={'60%'}
-              overflow="scroll"
-              borderRadius="$2xl"
-              padding="$4"
-              alignItems="center"
-              marginBottom="$2">
-              <View marginBottom={'$4'}>
-                <Text>Choose your avatar</Text>
-              </View>
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                height: '60%',
+                overflow: 'scroll',
+                borderRadius: 20,
+                padding: 20,
+                alignItems: 'center',
+                marginBottom: 20,
+                shadowColor: '#000',
+                shadowOffset: {width: 0, height: 2},
+                shadowOpacity: 0.25,
+                shadowRadius: 3.84,
+                elevation: 5,
+              }}>
+              <Text
+                style={{color: '#333', fontWeight: 'bold', marginBottom: 30}}>
+                Choose your Avatar
+              </Text>
               <ListFreeAvatar
                 handleAvatarClick={handleAvatarClick}
                 selectedAvatarId={selectedAvatarId}
               />
             </View>
-            <View
-              width={'100%'}
-              height={'10%'}
-              borderRadius="$2xl"
-              paddingHorizontal="$4"
-              paddingTop={'$1'}
-              alignItems="center">
-              <Input backgroundColor="white" width={'110%'} borderRadius="$xl">
+            <View>
+              <Input
+                borderRadius={15}
+                backgroundColor="rgba(255, 255, 255, 0.8)">
                 <InputSlot pl="$3">
                   <InputIcon as={AtSignIcon} />
                 </InputSlot>
@@ -120,25 +117,24 @@ export default function Profile({navigation}: any) {
               </Input>
             </View>
           </View>
-          <View width={'100%'} height={'15%'}>
+          <View style={{width: '100%', height: '15%'}}>
             <Button
               size="md"
-              backgroundColor="$amber600"
+              backgroundColor="#FF9800"
               variant="solid"
-              $active-bgColor="$amber700"
-              height="50%"
-              borderRadius="$2xl"
+              $active-bgColor="#F57C00"
+              height={50}
+              borderRadius={20}
               isDisabled={false}
               isFocusVisible={false}
               onPress={() => {
                 handleRegister();
                 navigation.navigate('StartGame');
               }}>
-              <ButtonText>Continue </ButtonText>
+              <Text style={{color: '#fff', fontWeight: 'bold'}}>Continue</Text>
             </Button>
           </View>
         </View>
-      </View>
     </ImageBackground>
   );
 }

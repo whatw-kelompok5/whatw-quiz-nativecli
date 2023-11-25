@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import {Image} from '@gluestack-ui/themed';
 import CountDown from 'react-native-countdown-component';
-import BackgroundLogo from '../assets/background.png';
 // import io from 'socket.io-client';
 import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from '../store/type/RootState';
@@ -71,12 +70,9 @@ const Matching = ({navigation}: any) => {
   };
 
   const progressText = `${Users.length}/${totalMatchingItems}`;
-
-  // ... (kode sebelumnya)
-
   return (
     <ImageBackground
-      source={BackgroundLogo as ImageSourcePropType}
+      source={require('../assets/images/background-image.jpg')}
       style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
       <View style={styles.container}>
         <Text style={styles.title}>Matching Up!!</Text>

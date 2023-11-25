@@ -1,15 +1,5 @@
-import {
-  View,
-  Image,
-  Text,
-  Button,
-  ButtonText,
-  Toast,
-  VStack,
-  ToastTitle,
-  ToastDescription,
-} from '@gluestack-ui/themed';
-import React, {useState} from 'react';
+import {View, Image, Text, Button, ButtonText} from '@gluestack-ui/themed';
+import React from 'react';
 import logo from '../assets/logo.png';
 import googleIcon from '../assets/google.png';
 import {ImageBackground} from 'react-native';
@@ -17,10 +7,10 @@ import {useAuth} from '../hooks/useAuth';
 import ReversedWaterWave from '../feature/background/ReversedWaterWave';
 import WaterWave from '../feature/background/WaterWave';
 export default function Login({navigation}: any) {
-  const {onGoogleButtonPress, handleLogin} = useAuth({navigation});
+  const {handleLogin} = useAuth({navigation});
   return (
     <ImageBackground
-      source={require('../assets/background.png')}
+      source={require('../assets/images/background-image.jpg')}
       style={{flex: 1}}>
       <View style={{flex: 1, position: 'relative'}}>
         <ReversedWaterWave />
@@ -33,6 +23,9 @@ export default function Login({navigation}: any) {
           alignItems="center"
           paddingVertical={60}
           paddingHorizontal={30}>
+          <Text color="white" fontWeight="bold">
+            WHATW
+          </Text>
           <View>
             <Image source={logo} alt="logo" width={400} height={400} />
           </View>

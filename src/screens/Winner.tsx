@@ -25,10 +25,6 @@ const WinnerComponent = ({navigation}: any) => {
           />
           <Text style={{fontSize: 15, paddingTop: 5}}>100</Text>
           <TouchableOpacity>
-            <Image
-              source={require('../assets/plus.png')}
-              style={{width: 30, height: 30}}
-            />
           </TouchableOpacity>
         </View>
         <Text

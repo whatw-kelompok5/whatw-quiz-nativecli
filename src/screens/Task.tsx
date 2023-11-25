@@ -1,10 +1,19 @@
 import React, {useEffect, useRef} from 'react';
-import {Button, ButtonText, View, Text, ButtonIcon} from '@gluestack-ui/themed';
+import {
+  Button,
+  ButtonText,
+  View,
+  Text,
+  ButtonIcon,
+  Image,
+} from '@gluestack-ui/themed';
 import {ImageBackground} from 'react-native';
 import CountDown from 'react-native-countdown-component';
 import Diamond from '../components/Diamond';
 import WaterWave from '../feature/background/WaterWave';
 import ReversedWaterWave from '../feature/background/ReversedWaterWave';
+import {RootState} from '../store/type/RootState';
+import {useSelector} from 'react-redux';
 
 export default function Task({navigation}: any) {
   const [currentQuestion, setCurrentQuestion] = React.useState(0);
@@ -13,6 +22,7 @@ export default function Task({navigation}: any) {
   const [timePerQuestion, setTimePerQuestion] = React.useState(10);
   const [timerKey, setTimerKey] = React.useState(0);
   const [selectedOption, setSelectedOption] = React.useState('');
+  const [selectedOptionIndex, setSelectedOptionIndex] = React.useState(-1);
 
   const quizData = [
     {
@@ -101,9 +111,12 @@ export default function Task({navigation}: any) {
     };
   }, [currentQuestion, showScore, quizData.length, timePerQuestion]);
 
+  useEffect(() => {
+    setSelectedOptionIndex(-1);
+  }, [currentQuestion]);
   return (
     <ImageBackground
-      source={require('../assets/background.png')}
+      source={require('../assets/images/background-image.jpg')}
       style={{flex: 1}}>
       <View style={{flex: 1, position: 'relative'}}>
         <View
@@ -143,8 +156,8 @@ export default function Task({navigation}: any) {
             borderTopLeftRadius="$2xl"
             borderTopRightRadius="$2xl"
             alignItems="center">
-            <WaterWave />
-            <ReversedWaterWave />
+            {/* <WaterWave />
+            <ReversedWaterWave /> */}
             <View
               borderWidth={10}
               width={300}
@@ -185,7 +198,7 @@ export default function Task({navigation}: any) {
                   {score}
                 </Text>
                 <Button onPress={() => navigation.navigate('StartGame')}>
-                  <Text color='white'>Continue</Text>
+                  <Text color="white">Continue</Text>
                 </Button>
               </View>
             ) : (
@@ -221,10 +234,17 @@ export default function Task({navigation}: any) {
                       width={300}
                       marginTop={10}
                       onPress={() => {
+                        setSelectedOptionIndex(index);
                         setSelectedOption(option);
                         handleAnswer(option);
                       }}>
                       <ButtonText>{option}</ButtonText>
+                      {selectedOptionIndex === index && (
+                        <View
+                          style={{position: 'absolute', top: -15, right: -15}}>
+                          <AvatarAnswer />
+                        </View>
+                      )}
                     </Button>
                   </View>
                 ))}
@@ -248,5 +268,27 @@ export default function Task({navigation}: any) {
         </View>
       </View>
     </ImageBackground>
+  );
+}
+
+function AvatarAnswer() {
+  const auth = useSelector((state: RootState) => state.auth);
+
+  return (
+    <View>
+      <Image
+        borderWidth={5}
+        width={50}
+        height={50}
+        borderRadius={100}
+        borderColor="white"
+        source={auth?.avatar?.image}
+        alt="avatar"
+        backgroundColor="red"
+        justifyContent="center"
+        alignItems="center"
+        position="relative"
+      />
+    </View>
   );
 }

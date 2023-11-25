@@ -1,5 +1,12 @@
 /* eslint-disable react-native/no-inline-styles */
-import {Button, View, Text, Image, Spinner} from '@gluestack-ui/themed';
+import {
+  Button,
+  View,
+  Text,
+  Image,
+  Spinner,
+  ScrollView,
+} from '@gluestack-ui/themed';
 import React, {useState, useEffect} from 'react';
 import Diamond from '../components/Diamond';
 import ChangeAvatar from '../components/ChangeAvatar';
@@ -12,8 +19,13 @@ import {RootState} from '../store/type/RootState';
 import ReversedWaterWave from '../feature/background/ReversedWaterWave';
 import WaterWave from '../feature/background/WaterWave';
 import Setting from '../feature/top/Setting';
+import LottieView from 'lottie-react-native';
+import {Loading} from '../feature/loading/Loading';
 export default function StartGameComponent({navigation}: any) {
   const [isLoading, setIsLoading] = useState(true);
+  const auth = useSelector((state: RootState) => state.auth);
+
+  useEffect(() => {}, [auth?.avatar?.image]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -23,29 +35,20 @@ export default function StartGameComponent({navigation}: any) {
     return () => clearTimeout(timeout);
   }, []);
 
-  const auth = useSelector((state: RootState) => state.auth);
-  const {Users} = useAuth({navigation});
-  const userLogin = Array.isArray(Users)
-    ? Users.filter((user: any) => user.email === auth.email)
-    : [];
-  const dataUserLogin = userLogin[0];
-
   useEffect(() => {
-    if (!isLoading && !dataUserLogin) {
+    if (!isLoading && !auth) {
       Alert.alert('Error connection', 'Please login again');
       navigation.navigate('Login');
     }
-  }, [isLoading, dataUserLogin, navigation]);
+  }, [isLoading, navigation]);
 
   return isLoading ? (
-    <Spinner size="large" />
+    <Loading />
   ) : (
     <ImageBackground
-      source={require('../assets/background.png')}
+      source={require('../assets/images/background-image.jpg')}
       style={{flex: 1}}>
       <View style={{flex: 1, position: 'relative'}}>
-        <ReversedWaterWave />
-        <WaterWave />
         <View
           width={'100%'}
           height={'100%'}
@@ -78,10 +81,12 @@ export default function StartGameComponent({navigation}: any) {
           </View>
           <View
             backgroundColor="white"
+            zIndex={-999}
             width={'100%'}
-            height={'75%'}
-            borderTopLeftRadius="$2xl"
-            borderTopRightRadius="$2xl"
+            height={400}
+            marginTop={-250}
+            borderBottomLeftRadius="$full"
+            borderBottomRightRadius="$full"
             alignItems="center">
             <Image
               borderWidth={10}
@@ -89,40 +94,50 @@ export default function StartGameComponent({navigation}: any) {
               height={200}
               borderRadius={100}
               borderColor="white"
-              source={dataUserLogin.avatar.image}
+              source={auth?.avatar?.image}
               alt="avatar"
-              marginTop={-100}
+              top={100}
               backgroundColor="red"
               justifyContent="center"
               alignItems="center"
               position="relative"
             />
-            <View position="absolute" top={-85} right={80} zIndex={999}>
+            <View position="absolute" top={120} right={90} zIndex={999}>
               <ChangeAvatar />
             </View>
-            <View marginTop={20}>
-              <Text fontWeight="bold" fontSize={20}>
-                {dataUserLogin.fullname}
+            <View top={120}>
+              <Text fontWeight="bold" fontSize={20} color="black">
+                {auth.fullname}
               </Text>
             </View>
-            <View position="absolute" margin={50}>
-              <Image source={logo} alt="logo" width={400} height={400} />
-            </View>
-            <View width={'80%'} height={'20%'}>
-              <Button
-                size="md"
-                backgroundColor="$amber600"
-                variant="solid"
-                $active-bgColor="$amber700"
-                height="50%"
-                borderRadius="$2xl"
-                isDisabled={false}
-                isFocusVisible={false}
-                top={300}
-                onPress={() => navigation.navigate('Matching')}>
-                <ButtonText>Start</ButtonText>
-              </Button>
-            </View>
+          </View>
+          <View width={'80%'} height={'20%'}>
+            <Button
+              size="md"
+              backgroundColor="#12486B"
+              display="flex"
+              justifyContent="space-between"
+              variant="solid"
+              $active-bgColor="$amber700"
+              height="50%"
+              borderRadius="$3xl"
+              isDisabled={false}
+              isFocusVisible={false}
+              onPress={() => navigation.navigate('Matching')}>
+              <LottieView
+                source={require('../assets/lottie/Animation - Global.json')}
+                autoPlay
+                loop
+                style={{width: 30, height: 30}}
+              />
+              <ButtonText color="white">Play</ButtonText>
+              <LottieView
+                source={require('../assets/lottie/Animation - Global.json')}
+                autoPlay
+                loop
+                style={{width: 30, height: 30}}
+              />
+            </Button>
           </View>
         </View>
       </View>

@@ -23,16 +23,6 @@ import {RootState} from '../store/type/RootState';
 
 export default function Diamond() {
   const auth = useSelector((state: RootState) => state.auth);
-
-  const {data: Users} = useQuery<RegisterType>({
-    queryKey: ['user'],
-    queryFn: async () => await API.get('/users').then(res => res.data.data),
-  });
-  const userLogin = Array.isArray(Users)
-    ? Users.filter((user: any) => user.email === auth.email)
-    : [];
-  const dataUserLogin = userLogin[0];
-
   const avatar = [
     {
       id: 1,
@@ -76,15 +66,15 @@ export default function Diamond() {
   const ref = React.useRef(null);
   return (
     <View>
-      <Button
-        size="xs"
-        variant="solid"
-        action="primary"
-        bg="white"
-        isDisabled={false}
-        isFocusVisible={false}
-        borderColor="white"
-        borderRadius="$2xl"
+      <View
+        bg="#12486B"
+        height={42}
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        flexDirection="row"
+        borderColor="#12486B"
+        borderRadius="$3xl"
         paddingRight={1}
         paddingLeft={2}>
         <Image
@@ -94,8 +84,8 @@ export default function Diamond() {
           height={25}
           marginRight={6}
         />
-        <ButtonText color="black" fontSize={15} marginRight={6}>
-          {dataUserLogin?.diamond}
+        <ButtonText color="white" fontSize={15} marginRight={8}>
+          {auth?.diamond}
         </ButtonText>
         <Center h={300}>
           <Button
@@ -104,9 +94,9 @@ export default function Diamond() {
             borderRadius="$full"
             width={10}
             h={40}
-            bg="#12486B"
+            bg="white"
             borderColor="$indigo600">
-            <ButtonIcon as={AddIcon} />
+            <ButtonIcon as={AddIcon} color="#12486B" />
           </Button>
           <Modal
             isOpen={showModal}
@@ -193,7 +183,7 @@ export default function Diamond() {
             </ModalContent>
           </Modal>
         </Center>
-      </Button>
+      </View>
     </View>
   );
 }

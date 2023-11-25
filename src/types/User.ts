@@ -6,7 +6,9 @@ type AvatarUser = {
 };
 
 export type RegisterType = {
+  token: string;
   fullname: string;
   email: string;
   avatar: AvatarUser | null;
+  diamond: number;
 };
