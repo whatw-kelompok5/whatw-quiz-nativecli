@@ -1,73 +1,69 @@
 import React, {useEffect, useState} from 'react';
-import {View} from '@gluestack-ui/themed';
 import {StyleSheet, Animated, Easing} from 'react-native';
+import {View} from '@gluestack-ui/themed';
+
+const colors = [
+  'rgba(109, 109, 109, 0.6)', // Abu tua
+  'rgba(89, 89, 89, 0.6)', // Abu sedang
+  'rgba(69, 69, 69, 0.6)', // Abu terang
+];
 
 export default function WaterWave() {
   const [rotateValue] = useState(new Animated.Value(0));
 
   useEffect(() => {
     const startAnimation = () => {
-      Animated.timing(rotateValue, {
-        toValue: 1,
-        duration: 15000,
-        easing: Easing.inOut(Easing.ease),
-        useNativeDriver: false,
-      }).start(() => {
-        rotateValue.setValue(0);
-        startAnimation();
-      });
+      Animated.loop(
+        Animated.timing(rotateValue, {
+          toValue: 1,
+          duration: 15000,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: false,
+        }),
+      ).start();
     };
 
     startAnimation();
   }, [rotateValue]);
 
+  const createWaveStyle = (top: string, size: number, color: string) => {
+    return {
+      position: 'absolute',
+      width: '300%',
+      height: '300%',
+      left: '-100%',
+      top: top,
+      backgroundColor: color,
+      borderRadius: size,
+      opacity: rotateValue.interpolate({
+        inputRange: [0, 0.5, 1],
+        outputRange: [0.3, 0.6, 0.3],
+      }),
+      transform: [
+        {
+          rotate: rotateValue.interpolate({
+            inputRange: [0, 1],
+            outputRange: ['0deg', '360deg'],
+          }),
+        },
+        {
+          scale: rotateValue.interpolate({
+            inputRange: [0, 1],
+            outputRange: [1, 1.2],
+          }),
+        },
+      ],
+    };
+  };
+
   return (
     <View style={styles.container} width={'100%'} height={'100%'}>
-      <Animated.View
-        style={[
-          styles.wave1,
-          {
-            transform: [
-              {
-                rotate: rotateValue.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: ['0deg', '360deg'],
-                }),
-              },
-            ],
-          },
-        ]}
-      />
-      <Animated.View
-        style={[
-          styles.wave2,
-          {
-            transform: [
-              {
-                rotate: rotateValue.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: ['0deg', '360deg'],
-                }),
-              },
-            ],
-          },
-        ]}
-      />
-      <Animated.View
-        style={[
-          styles.wave3,
-          {
-            transform: [
-              {
-                rotate: rotateValue.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: ['0deg', '360deg'],
-                }),
-              },
-            ],
-          },
-        ]}
-      />
+      {colors.map((color, index) => (
+        <Animated.View
+          key={index}
+          style={[createWaveStyle(`${50 + index * 7}%`, 40 + index * 5, color)]}
+        />
+      ))}
     </View>
   );
 }
@@ -80,32 +76,5 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: 'transparent',
-  },
-  wave1: {
-    position: 'absolute',
-    width: '300%',
-    height: '300%',
-    left: '-100%',
-    top: '50%',
-    backgroundColor: 'rgba(0,190,255,0.4)',
-    borderRadius: 45,
-  },
-  wave2: {
-    position: 'absolute',
-    width: '300%',
-    height: '300%',
-    left: '-100%',
-    top: '57%',
-    backgroundColor: 'rgba(0,70,110,0.4)',
-    borderRadius: 43,
-  },
-  wave3: {
-    position: 'absolute',
-    width: '300%',
-    height: '300%',
-    left: '-100%',
-    top: '60%',
-    backgroundColor: 'rgba(0,90,110,0.4)',
-    borderRadius: 40,
   },
 });

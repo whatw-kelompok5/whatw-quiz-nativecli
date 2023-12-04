@@ -1,13 +1,12 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
   Button,
   Input,
-  KeyboardAvoidingView,
   AtSignIcon,
 } from '@gluestack-ui/themed';
-import {Keyboard, Platform, ImageBackground} from 'react-native';
+import {ImageBackground} from 'react-native';
 import {useSelector, useDispatch} from 'react-redux';
 import {RootState} from '../store/type/RootState';
 import ListFreeAvatar from '../components/ListFreeAvatar';
@@ -49,7 +48,7 @@ export default function Profile({navigation}: any) {
       dispatch(UPDATE_AVATAR_AND_FULLNAME(dataToSend));
 
       const response = await API.post('/register', dataToSend);
-      console.log('Register success', response.data);
+      console.log('Register success');
       login();
       navigation.navigate('StartGame');
     } catch (error) {
@@ -67,74 +66,71 @@ export default function Profile({navigation}: any) {
     <ImageBackground
       source={require('../assets/images/background-image.jpg')}
       style={{flex: 1}}>
-        <ReversedWaterWave />
-        <WaterWave />
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            paddingVertical: 40,
-            paddingHorizontal: 20,
-          }}>
-          <View style={{flex: 1, width: '100%', marginBottom: 20}}>
-            <View
-              style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                height: '60%',
-                overflow: 'scroll',
-                borderRadius: 20,
-                padding: 20,
-                alignItems: 'center',
-                marginBottom: 20,
-                shadowColor: '#000',
-                shadowOffset: {width: 0, height: 2},
-                shadowOpacity: 0.25,
-                shadowRadius: 3.84,
-                elevation: 5,
-              }}>
-              <Text
-                style={{color: '#333', fontWeight: 'bold', marginBottom: 30}}>
-                Choose your Avatar
-              </Text>
-              <ListFreeAvatar
-                handleAvatarClick={handleAvatarClick}
-                selectedAvatarId={selectedAvatarId}
-              />
-            </View>
-            <View>
-              <Input
-                borderRadius={15}
-                backgroundColor="rgba(255, 255, 255, 0.8)">
-                <InputSlot pl="$3">
-                  <InputIcon as={AtSignIcon} />
-                </InputSlot>
-                <InputField
-                  placeholder="Search..."
-                  value={fullname}
-                  onChangeText={handleChange}
-                />
-              </Input>
-            </View>
+      <ReversedWaterWave />
+      <WaterWave />
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          paddingVertical: 40,
+          paddingHorizontal: 20,
+        }}>
+        <View style={{flex: 1, width: '100%', marginBottom: 20}}>
+          <View
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.8)',
+              height: '60%',
+              overflow: 'scroll',
+              borderRadius: 20,
+              padding: 20,
+              alignItems: 'center',
+              marginBottom: 20,
+              shadowColor: '#000',
+              shadowOffset: {width: 0, height: 2},
+              shadowOpacity: 0.25,
+              shadowRadius: 3.84,
+              elevation: 5,
+            }}>
+            <Text style={{color: '#333', fontWeight: 'bold', marginBottom: 30}}>
+              Choose your Avatar
+            </Text>
+            <ListFreeAvatar
+              handleAvatarClick={handleAvatarClick}
+              selectedAvatarId={selectedAvatarId}
+            />
           </View>
-          <View style={{width: '100%', height: '15%'}}>
-            <Button
-              size="md"
-              backgroundColor="#FF9800"
-              variant="solid"
-              $active-bgColor="#F57C00"
-              height={50}
-              borderRadius={20}
-              isDisabled={false}
-              isFocusVisible={false}
-              onPress={() => {
-                handleRegister();
-                navigation.navigate('StartGame');
-              }}>
-              <Text style={{color: '#fff', fontWeight: 'bold'}}>Continue</Text>
-            </Button>
+          <View>
+            <Input borderRadius={15} backgroundColor="rgba(255, 255, 255, 0.8)">
+              <InputSlot pl="$3">
+                <InputIcon as={AtSignIcon} />
+              </InputSlot>
+              <InputField
+                placeholder="username..."
+                value={fullname}
+                onChangeText={handleChange}
+              />
+            </Input>
           </View>
         </View>
+        <View style={{width: '100%', height: '15%'}}>
+          <Button
+            size="md"
+            backgroundColor="#FF9800"
+            variant="solid"
+            $active-bgColor="#F57C00"
+            height={50}
+            borderRadius={20}
+            isDisabled={false}
+            isFocusVisible={false}
+            onPress={() => {
+              handleRegister();
+              navigation.navigate('StartGame');
+            }}>
+            <Text style={{color: '#fff', fontWeight: 'bold'}}>Continue</Text>
+          </Button>
+        </View>
+      </View>
     </ImageBackground>
   );
 }

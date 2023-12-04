@@ -67,7 +67,7 @@ export default function Diamond() {
   return (
     <View>
       <View
-        bg="#12486B"
+        bg="white"
         height={42}
         display="flex"
         justifyContent="center"
@@ -84,7 +84,7 @@ export default function Diamond() {
           height={25}
           marginRight={6}
         />
-        <ButtonText color="white" fontSize={15} marginRight={8}>
+        <ButtonText color="black" fontSize={15} fontWeight="bold" marginRight={8}>
           {auth?.diamond}
         </ButtonText>
         <Center h={300}>
@@ -94,9 +94,10 @@ export default function Diamond() {
             borderRadius="$full"
             width={10}
             h={40}
-            bg="white"
-            borderColor="$indigo600">
-            <ButtonIcon as={AddIcon} color="#12486B" />
+            bg="#12486B"
+            borderColor="$indigo600"
+            $active-bgColor="#F5F5F5">
+            <ButtonIcon as={AddIcon} color="white" />
           </Button>
           <Modal
             isOpen={showModal}

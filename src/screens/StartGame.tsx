@@ -1,46 +1,76 @@
-/* eslint-disable react-native/no-inline-styles */
-import {
-  Button,
-  View,
-  Text,
-  Image,
-  Spinner,
-  ScrollView,
-} from '@gluestack-ui/themed';
+import {Button, View, Text, Image} from '@gluestack-ui/themed';
 import React, {useState, useEffect} from 'react';
 import Diamond from '../components/Diamond';
 import ChangeAvatar from '../components/ChangeAvatar';
 import {ButtonText} from '@gluestack-ui/themed';
-import logo from '../assets/logo.png';
-import {Alert, ImageBackground} from 'react-native';
+import {ImageBackground} from 'react-native';
 import {useSelector} from 'react-redux';
-import {useAuth} from '../hooks/useAuth';
 import {RootState} from '../store/type/RootState';
-import ReversedWaterWave from '../feature/background/ReversedWaterWave';
-import WaterWave from '../feature/background/WaterWave';
 import Setting from '../feature/top/Setting';
 import LottieView from 'lottie-react-native';
 import {Loading} from '../feature/loading/Loading';
+import {useDispatch} from 'react-redux';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {AUTH_LOGIN} from '../store/RootReducer';
+
 export default function StartGameComponent({navigation}: any) {
   const [isLoading, setIsLoading] = useState(true);
-  const auth = useSelector((state: RootState) => state.auth);
-
-  useEffect(() => {}, [auth?.avatar?.image]);
+  const [userData, setUserData] = useState<any>(null);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      setIsLoading(false);
-    }, 3000);
+    async function fetchData() {
+      try {
+        const userDataFromStorage = await AsyncStorage.getItem('userData');
+        if (userDataFromStorage) {
+          const userDataParsed = JSON.parse(userDataFromStorage);
+          setUserData(userDataParsed);
+          dispatch(
+            AUTH_LOGIN({
+              token: userDataParsed.token,
+              avatar: userDataParsed.avatar,
+              fullname: userDataParsed.fullname,
+              email: userDataParsed.email,
+              diamond: userDataParsed.diamond,
+            }),
+          );
+        }
+      } catch (error) {
+        console.log('Error fetching user data:', error);
+      }
+    }
 
-    return () => clearTimeout(timeout);
+    fetchData();
   }, []);
 
+  const auth = useSelector((state: RootState) => state.auth);
+
   useEffect(() => {
-    if (!isLoading && !auth) {
-      Alert.alert('Error connection', 'Please login again');
-      navigation.navigate('Login');
+    async function setAsyncStorage() {
+      await AsyncStorage.setItem(
+        'userData',
+        JSON.stringify({
+          token: auth.token,
+          email: auth.email,
+          fullname: auth.fullname,
+          avatar: auth.avatar,
+          diamond: auth.diamond,
+        }),
+      );
     }
-  }, [isLoading, navigation]);
+
+    setAsyncStorage();
+  }, [auth]);
+
+  useEffect(() => {
+    if (!auth && !userData) {
+      setIsLoading(true);
+    } else {
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 3000);
+    }
+  }, [userData, auth]);
 
   return isLoading ? (
     <Loading />
@@ -64,7 +94,7 @@ export default function StartGameComponent({navigation}: any) {
             width="100%"
             paddingHorizontal={30}>
             <Setting navigation={navigation} />
-            <View />
+
             <View position="absolute" right={10}>
               <View
                 backgroundColor="white"
@@ -80,33 +110,58 @@ export default function StartGameComponent({navigation}: any) {
             </View>
           </View>
           <View
-            backgroundColor="white"
+            backgroundColor="transparent"
             zIndex={-999}
             width={'100%'}
-            height={400}
-            marginTop={-250}
-            borderBottomLeftRadius="$full"
-            borderBottomRightRadius="$full"
+            height={450}
+            position="absolute"
+            borderBottomLeftRadius="$3xl"
+            borderBottomRightRadius="$3xl"
             alignItems="center">
+            <View position="absolute" top={125}>
+              <LottieView
+                source={require('../assets/lottie/Animation - 1701092146998.json')}
+                autoPlay
+                loop
+                style={{width: 300, height: 300}}
+              />
+            </View>
             <Image
               borderWidth={10}
-              width={200}
-              height={200}
+              width={150}
+              height={150}
               borderRadius={100}
               borderColor="white"
               source={auth?.avatar?.image}
               alt="avatar"
-              top={100}
-              backgroundColor="red"
+              top={200}
+              backgroundColor="white"
               justifyContent="center"
               alignItems="center"
               position="relative"
             />
-            <View position="absolute" top={120} right={90} zIndex={999}>
+            <View
+              position="absolute"
+              marginTop={'47%'}
+              width={'100%'}
+              left={50}
+              zIndex={999}>
               <ChangeAvatar />
             </View>
-            <View top={120}>
-              <Text fontWeight="bold" fontSize={20} color="black">
+            <View top={250} alignItems="center" width={'100%'}>
+              <Text
+                textAlign="center"
+                fontWeight="bold"
+                fontSize={12}
+                color="gray"
+                marginBottom={4}>
+                Hello👋
+              </Text>
+              <Text
+                fontWeight="bold"
+                fontSize={20}
+                color="white"
+                textAlign="center">
                 {auth.fullname}
               </Text>
             </View>
@@ -114,12 +169,14 @@ export default function StartGameComponent({navigation}: any) {
           <View width={'80%'} height={'20%'}>
             <Button
               size="md"
-              backgroundColor="#12486B"
+              borderWidth={1}
               display="flex"
               justifyContent="space-between"
               variant="solid"
-              $active-bgColor="$amber700"
               height="50%"
+              backgroundColor="transparent"
+              borderColor="white"
+              $active-borderColor="#12486B"
               borderRadius="$3xl"
               isDisabled={false}
               isFocusVisible={false}

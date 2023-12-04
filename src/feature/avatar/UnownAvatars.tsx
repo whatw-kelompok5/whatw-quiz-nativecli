@@ -1,11 +1,11 @@
 import React, {useEffect, useState} from 'react';
 import {View, Avatar, AvatarImage, Button, Text} from '@gluestack-ui/themed';
-import {useAvatar} from '../hooks/useAvatar';
-import LoadingAvatar from '../feature/loading/LoadingAvatar';
+import {useAvatar} from '../../hooks/useAvatar';
+import LoadingAvatar from '../loading/LoadingAvatar';
 
-const ListAllAvatar = ({handleAvatarClick, selectedAvatarId}: any) => {
-  const {AvatarsUser} = useAvatar();
+const UnownAvatars = ({handleAvatarClick, selectedAvatarId}: any) => {
   const [isLoading, setIsLoading] = useState(true);
+  const {AvatarsUser} = useAvatar();
   useEffect(() => {
     if (AvatarsUser) {
       setIsLoading(false);
@@ -15,7 +15,7 @@ const ListAllAvatar = ({handleAvatarClick, selectedAvatarId}: any) => {
   });
 
   const ownedAvatars = AvatarsUser?.filter(
-    (avatar: {owned: boolean}) => avatar.owned === true,
+    (avatar: {owned: boolean}) => avatar.owned === false,
   );
 
   const avatarRows = [];
@@ -35,17 +35,13 @@ const ListAllAvatar = ({handleAvatarClick, selectedAvatarId}: any) => {
       alignItems="center"
       justifyContent="center">
       {avatarRows.map((row, rowIndex) => (
-        <View key={rowIndex} flexDirection="row" gap={20}>
+        <View key={rowIndex} flexDirection="row" gap={10}>
           {row.map((avatar, index) => (
             <Button
               key={index}
-              marginBottom={10}
               display="flex"
               flexDirection="column"
-              $active={{bgColor: '#12486B'}}
-              bgColor={
-                selectedAvatarId === avatar.id ? '#12486B' : 'transparent'
-              }
+              bgColor={selectedAvatarId === avatar.id ? 'gray' : 'transparent'}
               width={60}
               height={85}
               style={{
@@ -60,11 +56,7 @@ const ListAllAvatar = ({handleAvatarClick, selectedAvatarId}: any) => {
               <Avatar bgColor="transparent" size="md" borderRadius="$full">
                 <AvatarImage source={{uri: avatar.image}} />
               </Avatar>
-              <Text
-                fontSize="$xs"
-                width="200%"
-                color={selectedAvatarId === avatar.id ? 'white' : 'black'}
-                $active={{color: 'white'}}>
+              <Text fontSize="$xs" width="200%">
                 {avatar.owned === true ? 'owned' : avatar.price}
               </Text>
             </Button>
@@ -75,4 +67,4 @@ const ListAllAvatar = ({handleAvatarClick, selectedAvatarId}: any) => {
   );
 };
 
-export default ListAllAvatar;
+export default UnownAvatars;

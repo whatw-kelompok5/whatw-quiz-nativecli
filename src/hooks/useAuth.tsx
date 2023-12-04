@@ -4,8 +4,8 @@ import auth from '@react-native-firebase/auth';
 import {useDispatch} from 'react-redux';
 import {AUTH_LOGIN, AUTH_LOGOUT} from '../store/RootReducer';
 import {API} from '../libs/api';
-import {RegisterType} from '../types/User';
 import {useQuery} from '@tanstack/react-query';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 GoogleSignin.configure({
   webClientId:
@@ -96,9 +96,19 @@ export function useAuth({navigation}: any) {
       } else {
         console.log('Data pengguna tidak ditemukan.');
       }
-      console.log('Login success', response.data);
+      await AsyncStorage.setItem(
+        'userData',
+        JSON.stringify({
+          token: response.data.token,
+          email: fetchedUserInfo.email,
+          fullname: userData.fullname,
+          avatar: userData.avatar,
+          diamond: userData.diamond,
+        }),
+      );
+      console.log('Login success');
     } catch (error) {
-      console.log('Login error', error);
+      console.log('Login process');
     }
   }
 
@@ -116,6 +126,7 @@ export function useAuth({navigation}: any) {
   }
   const logout = async () => {
     try {
+      await AsyncStorage.removeItem('userData');
       dispatch(AUTH_LOGOUT());
       await GoogleSignin.revokeAccess();
       await GoogleSignin.signOut();

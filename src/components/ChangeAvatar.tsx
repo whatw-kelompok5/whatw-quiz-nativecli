@@ -12,14 +12,17 @@ import {
   ModalHeader,
   ModalBackdrop,
   View,
+  Text,
 } from '@gluestack-ui/themed';
 import React, {useState} from 'react';
 import ListAllAvatar from './ListAllAvatar';
 import {useDispatch, useSelector} from 'react-redux';
-import {UPDATE_AVATAR_AND_FULLNAME} from '../store/slice/AuthSlice';
+import {UPDATE_AVATAR} from '../store/slice/AuthSlice';
 import {API} from '../libs/api';
 import {RootState} from '../store/type/RootState';
 import {useAuth} from '../hooks/useAuth';
+import UnownAvatars from '../feature/avatar/UnownAvatars';
+import AccordionComponent from './Accordion';
 
 export default function ChangeAvatar({navigation}: any) {
   const [showModal, setShowModal] = useState(false);
@@ -47,11 +50,12 @@ export default function ChangeAvatar({navigation}: any) {
       };
 
       const response = await API.patch('/user', dataToSend, {headers});
-      console.log('Success change avatar', response.data);
-      dispatch({
-        type: UPDATE_AVATAR_AND_FULLNAME,
-        payload: response.data.data,
-      });
+      console.log('Success change avatar');
+      dispatch(
+        UPDATE_AVATAR({
+          avatar: response.data.data.avatar,
+        }),
+      );
     } catch (error) {
       console.log(error);
     }
@@ -63,12 +67,14 @@ export default function ChangeAvatar({navigation}: any) {
         onPress={() => setShowModal(true)}
         ref={ref}
         borderRadius="$full"
-        width={10}
-        h={40}
+        width={0}
+        h={43}
         p="$3.5"
         bg="white"
-        borderColor="$indigo600">
-        <ButtonIcon as={EditIcon} color="#12486B" />
+        borderColor="white"
+        borderWidth={2}
+        $active-borderColor="#12486B">
+        <ButtonIcon as={EditIcon} color="#12486B" size="xs" />
       </Button>
       <Modal
         isOpen={showModal}
@@ -90,17 +96,36 @@ export default function ChangeAvatar({navigation}: any) {
               <View marginBottom="$10">
                 <Heading size="lg">Change your avatar</Heading>
               </View>
+              <View height={400}>
+                <AccordionComponent
+                  handleAvatarClick={handleAvatarClick}
+                  selectedAvatarId={selectedAvatarId}
+                />
+              </View>
+              {/* <View
+                flexDirection="row"
+                flexWrap="wrap"
+                width={'100%'}
+                justifyContent="space-between"
+                gap={10}>
+                <Text textAlign="center">Your avatar</Text>
+                <ListAllAvatar
+                  handleAvatarClick={handleAvatarClick}
+                  selectedAvatarId={selectedAvatarId}
+                />
+              </View>
               <View
                 flexDirection="row"
                 flexWrap="wrap"
                 width={'100%'}
                 justifyContent="space-between"
                 gap={10}>
-                <ListAllAvatar
+                <Text>Other avatar</Text>
+                <UnownAvatars
                   handleAvatarClick={handleAvatarClick}
                   selectedAvatarId={selectedAvatarId}
                 />
-              </View>
+              </View> */}
             </View>
           </ModalBody>
           <ModalFooter>
@@ -117,6 +142,7 @@ export default function ChangeAvatar({navigation}: any) {
             <Button
               size="sm"
               backgroundColor="#12486B"
+              $active-bgColor="#001524"
               width={80}
               action="positive"
               borderWidth="$0"

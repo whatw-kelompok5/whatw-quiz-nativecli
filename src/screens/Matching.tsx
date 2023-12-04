@@ -1,132 +1,198 @@
 import React, {useState, useEffect} from 'react';
-import {
-  View,
-  Text,
-  ImageBackground,
-  StyleSheet,
-  FlatList,
-  ImageSourcePropType,
-} from 'react-native';
+import {View, Text, ImageBackground, StyleSheet, Alert} from 'react-native';
 import {Image} from '@gluestack-ui/themed';
-import CountDown from 'react-native-countdown-component';
-// import io from 'socket.io-client';
-import {useDispatch, useSelector} from 'react-redux';
+import {CountdownCircleTimer} from 'react-native-countdown-circle-timer';
+import io from 'socket.io-client';
+import {useSelector} from 'react-redux';
 import {RootState} from '../store/type/RootState';
-import {useAuth} from '../hooks/useAuth';
+import LottieView from 'lottie-react-native';
+import {Loading} from '../feature/loading/Loading';
+
 interface UserData {
   avatar: string;
   fullname: string;
+  countdownTime?: number;
+  socketId: string;
 }
+
 const Matching = ({navigation}: any) => {
-  const totalMatchingItems = 5;
-  const initialCountdownTime = 60;
-  const [countdownTime, setCountdownTime] = useState(initialCountdownTime);
+  const totalMatchingItems = 2;
+  const [isLoading, setIsLoading] = useState(true);
+  const [countdownTime, setCountdownTime] = useState(0);
+  const [countdown, setCountdown] = useState(0);
   const [matchingData, setMatchingData] = useState<UserData[]>([]);
   const auth = useSelector((state: RootState) => state.auth);
-  const {Users}: any = useAuth({navigation});
-
-  // useEffect(() => {
-  //   const socket = io('http://192.168.18.157:5000');
-
-  //   socket.on('connect', () => {
-  //     console.log('Socket.IO connected');
-  //     socket.emit('userData', {  avatar: auth.avatar, fullname: auth.fullname });
-  //   });
-
-  //   socket.on('userData', (userData) => {
-  //     console.log('Received user data:', userData);
-
-  //     setMatchingData((prevData) => (prevData.length < totalMatchingItems ? [...prevData, userData] : prevData));
-  //   });
-
-  //   socket.on('usersData', (usersData) => {
-  //     console.log('Received users data:', usersData);
-  //     setMatchingData(usersData.slice(0, totalMatchingItems));
-  //   });
-
-  //   socket.on('disconnect', () => {
-  //     console.log('Socket.IO disconnected');
-  //   });
-
-  //   return () => {
-  //     socket.disconnect();
-  //   };
-  // }, [auth]);
 
   useEffect(() => {
-    if (Users.length >= totalMatchingItems) {
+    const timeout = setTimeout(() => {
+      setIsLoading(false);
+    }, 3000);
+
+    return () => clearTimeout(timeout);
+  }, []);
+  useEffect(() => {
+    if (!isLoading && !auth) {
+      Alert.alert('Error connection', 'Please login again');
+      navigation.navigate('Login');
+    }
+  }, [isLoading, navigation]);
+
+  useEffect(() => {
+    const socket = io('http://192.168.18.107:3000');
+    // const socket = io('http://192.168.100.7:5000');
+
+    socket.on('connect', () => {
+      console.log('Socket.IO connected');
+      socket.emit('userData', {
+        avatar: auth.avatar?.image,
+        fullname: auth.fullname,
+        answers: {},
+        score: -1,
+      });
+    });
+
+    socket.on('userData', (userData: UserData) => {
+      console.log('Received user data:', userData);
+
+      setMatchingData(prevData => {
+        const newData =
+          prevData.length < totalMatchingItems
+            ? [...prevData, userData]
+            : prevData;
+        return newData;
+      });
+    });
+
+    socket.on('usersData', (usersData: UserData[]) => {
+      setMatchingData(usersData.slice(0, totalMatchingItems));
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Socket.IO disconnected');
+    });
+
+    socket.on('countdown', data => {
+      setCountdownTime(data);
+    });
+
+    socket.on('countdown', data => {
+      setCountdown(data);
+    });
+
+    socket.on('playerJoined', count => {
+      setPlayerCount(count);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [auth]);
+
+  useEffect(() => {
+    if (matchingData.length === totalMatchingItems) {
       setTimeout(() => {
         navigation.navigate('Task');
       }, 5000);
-    } else {
-      setCountdownTime(initialCountdownTime);
     }
-  }, [matchingData, navigation]);
+  }, [matchingData, totalMatchingItems]);
 
   const handleCountdownFinish = () => {
-    if (matchingData.length < totalMatchingItems) {
-      setCountdownTime(initialCountdownTime);
+    if (matchingData.length === totalMatchingItems) {
+      setCountdownTime(countdownTime);
     }
   };
 
-  const progressText = `${Users.length}/${totalMatchingItems}`;
-  return (
+  const progressText = `${matchingData.length}/${totalMatchingItems}`;
+
+  return isLoading ? (
+    <Loading />
+  ) : (
     <ImageBackground
       source={require('../assets/images/background-image.jpg')}
       style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
       <View style={styles.container}>
-        <Text style={styles.title}>Matching Up!!</Text>
-
-        <CountDown
-          size={50}
-          until={countdownTime}
-          onFinish={handleCountdownFinish}
-          digitStyle={{backgroundColor: 'transparent'}}
-          digitTxtStyle={{color: '#FFA33C'}}
-          separatorStyle={{color: '#FFA33C', fontWeight: 'bold'}}
-          timeToShow={['M', 'S']}
-          timeLabels={{m: null || undefined, s: null || undefined}}
-          showSeparator
+        <CountdownCircleTimer
+          isPlaying
+          duration={countdown}
+          colors={['#004777', '#F7B801', '#A30000', '#A30000']}
+          colorsTime={[50, 30, 20, 10]}
+          onComplete={handleCountdownFinish}
+          size={100}>
+          {({remainingTime}) => (
+            <Text
+              style={{
+                position: 'absolute',
+                zIndex: 999,
+                top: 20,
+                fontSize: 50,
+                color: 'black',
+              }}>
+              {remainingTime}
+            </Text>
+          )}
+        </CountdownCircleTimer>
+        <LottieView
+          source={require('../assets/lottie/Animation - Circle.json')}
+          autoPlay
+          loop
+          style={{width: 160, height: 160, top: -130, right: 0}}
         />
-
+        <Text style={styles.title}>Matching Up!!</Text>
         <Text style={styles.progress}>{progressText}</Text>
-
-        <View style={styles.cardRow}>
-          {/* Baris Pertama */}
-          <FlatList
-            data={Users.slice(0, Math.min(2, Users.length))}
-            renderItem={({item}) => (
-              <View style={styles.card}>
-                <Image source={auth.avatar?.image} style={styles.avatar} />
-                <Text style={styles.name}>{auth.fullname}</Text>
-              </View>
-            )}
-            numColumns={2}
-            contentContainerStyle={styles.listContainer}
-          />
+      </View>
+      <View style={styles.matchingContainer}>
+        {/* Dua elemen pertama */}
+        <View style={styles.matchingRow}>
+          {matchingData.slice(0, 2).map((item, index) => (
+            <View key={index} style={styles.card}>
+              {item.avatar ? (
+                <Image
+                  source={{uri: item.avatar}}
+                  alt="avatar"
+                  style={styles.avatar}
+                />
+              ) : (
+                <Text>No Image</Text>
+              )}
+              <Text style={styles.name}>{item.fullname}</Text>
+            </View>
+          ))}
         </View>
 
-        <View style={styles.middleRow}>
-          {/* Baris Kedua */}
-          <View style={styles.card}>
-            <Image source={auth.avatar?.image} style={styles.avatar} />
-            <Text style={styles.name}>{auth.fullname}</Text>
-          </View>
+        {/* Satu elemen tengah */}
+        <View style={styles.card}>
+          {matchingData.slice(2, 3).map((item, index) => (
+            <View key={index} style={styles.card}>
+              {item.avatar ? (
+                <Image
+                  source={{uri: item.avatar}}
+                  alt="avatar"
+                  style={styles.avatar}
+                />
+              ) : (
+                <Text>No Image</Text>
+              )}
+              <Text style={styles.name}>{item.fullname}</Text>
+            </View>
+          ))}
         </View>
 
-        <View style={styles.cardRow}>
-          {/* Baris Ketiga */}
-          <FlatList
-            data={Users.slice(2, Math.min(4, Users.length))}
-            renderItem={({item}) => (
-              <View style={styles.card}>
-                <Image source={auth.avatar?.image} style={styles.avatar} />
-                <Text style={styles.name}>{auth.fullname}</Text>
-              </View>
-            )}
-            numColumns={2}
-            contentContainerStyle={styles.listContainer}
-          />
+        {/* Dua elemen terakhir */}
+        <View style={styles.matchingRow}>
+          {matchingData.slice(3, 5).map((item, index) => (
+            <View key={index} style={styles.card}>
+              {item.avatar ? (
+                <Image
+                  source={{uri: item.avatar}}
+                  alt="avatar"
+                  style={styles.avatar}
+                />
+              ) : (
+                <Text>No Image</Text>
+              )}
+              <Text style={styles.name}>{item.fullname}</Text>
+            </View>
+          ))}
         </View>
       </View>
     </ImageBackground>
@@ -138,56 +204,70 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 50,
+    position: 'relative',
+    top: 80,
+    // marginTop: -80,
+    // paddingHorizontal: 20,
+    // paddingTop: -30,
   },
   title: {
     color: 'white',
     fontSize: 30,
     fontWeight: 'bold',
+    marginTop: 50,
     marginBottom: -20,
+    top: -200,
   },
   progress: {
     color: 'white',
     fontSize: 30,
     fontWeight: 'bold',
-    marginTop: -20,
-    marginBottom: 20,
-  },
-  listContainer: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  cardRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    marginBottom: 10,
+    marginTop: 30,
+    top: -200,
+    // marginBottom: 20,
   },
   middleRow: {
     alignItems: 'center',
-    marginBottom: 20,
+    // marginBottom: 10,
+  },
+  matchingContainer: {
+    // flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 62,
+    top: -75,
+    gap: 20,
+  },
+  matchingRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '46%',
   },
   card: {
     width: 150,
     height: 120,
-    backgroundColor: 'white',
+    // backgroundColor: 'white',
     borderRadius: 10,
     marginHorizontal: 5,
     justifyContent: 'center',
     alignItems: 'center',
   },
   avatar: {
-    width: 80,
-    height: 80,
+    width: 100,
+    height: 100,
     borderRadius: 40,
     marginBottom: 10,
   },
   name: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: 'black',
+    color: 'white',
   },
 });
 
 export default Matching;
+function setPlayerCount(count: any) {
+  throw new Error('Function not implemented.');
+}
