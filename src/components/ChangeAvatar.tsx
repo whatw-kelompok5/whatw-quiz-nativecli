@@ -29,12 +29,6 @@ export default function ChangeAvatar({navigation}: any) {
   const ref = React.useRef(null);
   const dispatch = useDispatch();
   const auth = useSelector((state: RootState) => state.auth);
-  const {Users} = useAuth({navigation});
-  const userLogin = Array.isArray(Users)
-    ? Users.filter((user: any) => user.email === auth.email)
-    : [];
-  const dataUserLogin = userLogin[0];
-
   const [selectedAvatarId, setSelectedAvatarId] = useState<any>(null);
   const handleAvatarClick = (avatarId: any) => {
     setSelectedAvatarId(avatarId);
@@ -43,7 +37,6 @@ export default function ChangeAvatar({navigation}: any) {
     try {
       const dataToSend = {
         avatar: selectedAvatarId,
-        fullname: dataUserLogin.fullname,
       };
       const headers = {
         Authorization: `Bearer ${auth.token}`,
@@ -102,30 +95,6 @@ export default function ChangeAvatar({navigation}: any) {
                   selectedAvatarId={selectedAvatarId}
                 />
               </View>
-              {/* <View
-                flexDirection="row"
-                flexWrap="wrap"
-                width={'100%'}
-                justifyContent="space-between"
-                gap={10}>
-                <Text textAlign="center">Your avatar</Text>
-                <ListAllAvatar
-                  handleAvatarClick={handleAvatarClick}
-                  selectedAvatarId={selectedAvatarId}
-                />
-              </View>
-              <View
-                flexDirection="row"
-                flexWrap="wrap"
-                width={'100%'}
-                justifyContent="space-between"
-                gap={10}>
-                <Text>Other avatar</Text>
-                <UnownAvatars
-                  handleAvatarClick={handleAvatarClick}
-                  selectedAvatarId={selectedAvatarId}
-                />
-              </View> */}
             </View>
           </ModalBody>
           <ModalFooter>

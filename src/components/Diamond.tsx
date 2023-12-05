@@ -4,66 +4,60 @@ import {
   Button,
   ButtonText,
   Heading,
-  Modal,
   ModalBody,
   ModalContent,
   ModalFooter,
   ModalHeader,
-  Text,
   ModalBackdrop,
   View,
+  Modal,
 } from '@gluestack-ui/themed';
 import React, {useState} from 'react';
 import diamond from '../assets/diamond.png';
-import {useQuery} from '@tanstack/react-query';
-import {RegisterType} from '../types/User';
-import {API} from '../libs/api';
 import {useSelector} from 'react-redux';
 import {RootState} from '../store/type/RootState';
+import ListDiamond from './ListDiamond';
+import Diamonds from '../mocks/diamond';
+import {API} from '../libs/api';
+import WebView from 'react-native-webview';
 
 export default function Diamond() {
   const auth = useSelector((state: RootState) => state.auth);
-  const avatar = [
-    {
-      id: 1,
-      name: 'John',
-      avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
-      price: 100,
-    },
-    {
-      id: 2,
-      name: 'Jane',
-      avatar: 'https://randomuser.me/api/portraits/women/1.jpg',
-      price: 200,
-    },
-    {
-      id: 3,
-      name: 'Joe',
-      avatar: 'https://randomuser.me/api/portraits/men/2.jpg',
-      price: 300,
-    },
-    {
-      id: 4,
-      name: 'Jill',
-      avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
-      price: 400,
-    },
-    {
-      id: 5,
-      name: 'Jack',
-      avatar: 'https://randomuser.me/api/portraits/men/3.jpg',
-      price: 500,
-    },
-    {
-      id: 6,
-      name: 'Jill',
-      avatar: 'https://randomuser.me/api/portraits/women/3.jpg',
-      price: 600,
-    },
-  ];
-
   const [showModal, setShowModal] = useState(false);
   const ref = React.useRef(null);
+  const [selectedDiamondId, setSelectedDiamondId] = useState<any>(null);
+  const [responseUrl, setResponseUrl] = useState<any>('');
+  const [visiblePaymentModal, setVisiblePaymentModal] = React.useState(false);
+
+  const handleDiamondClick = (diamondId: any) => {
+    setSelectedDiamondId(diamondId);
+  };
+  async function handleDiamondPayment() {
+    try {
+      const selectedDiamond = Diamonds.find(
+        diamond => diamond.id === selectedDiamondId,
+      );
+      if (selectedDiamond) {
+        const {id, price, quantity} = selectedDiamond;
+        const dataToSend = {
+          id,
+          name: 'diamond',
+          price,
+          quantity,
+        };
+        console.log(dataToSend);
+        const response = await API.post('/midtrans/transaction', dataToSend);
+        setResponseUrl(response.data.data.payment_url);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const WEB_PAGE_URL = responseUrl;
+  const openLinkInWebView = () => setVisiblePaymentModal(true);
+
+  console.log(responseUrl);
   return (
     <View>
       <View
@@ -84,7 +78,11 @@ export default function Diamond() {
           height={25}
           marginRight={6}
         />
-        <ButtonText color="black" fontSize={15} fontWeight="bold" marginRight={8}>
+        <ButtonText
+          color="black"
+          fontSize={15}
+          fontWeight="bold"
+          marginRight={8}>
           {auth?.diamond}
         </ButtonText>
         <Center h={300}>
@@ -117,7 +115,7 @@ export default function Diamond() {
                   alignItems="center"
                   marginBottom="$2">
                   <View marginBottom="$10">
-                    <Heading size="lg">Change your avatar</Heading>
+                    <Heading size="lg">Gets your diamon now</Heading>
                   </View>
                   <View
                     flexDirection="row"
@@ -125,38 +123,10 @@ export default function Diamond() {
                     width={'100%'}
                     justifyContent="space-between"
                     gap={10}>
-                    {avatar.map(item => (
-                      <View
-                        key={item.id}
-                        backgroundColor="#12486B"
-                        paddingVertical={10}
-                        paddingHorizontal={10}
-                        justifyContent="center"
-                        alignItems="center"
-                        borderRadius={10}>
-                        <Image
-                          source={{uri: item.avatar}}
-                          alt="avatar"
-                          width={100}
-                          height={100}
-                          borderRadius={100}
-                        />
-                        <View
-                          display="flex"
-                          flexDirection="row"
-                          justifyContent="space-between"
-                          alignItems="center"
-                          marginTop={20}
-                          gap={10}>
-                          <Text color="white" fontWeight="bold" fontSize={20}>
-                            {item.name}
-                          </Text>
-                          <Text color="yellow" fontWeight="bold">
-                            ${item.price}
-                          </Text>
-                        </View>
-                      </View>
-                    ))}
+                    <ListDiamond
+                      handleDiamondClick={handleDiamondClick}
+                      selectedDiamondId={selectedDiamondId}
+                    />
                   </View>
                 </View>
               </ModalBody>
@@ -173,10 +143,14 @@ export default function Diamond() {
                 </Button>
                 <Button
                   size="sm"
+                  backgroundColor="#12486B"
+                  $active-bgColor="#001524"
                   action="positive"
                   borderWidth="$0"
                   onPress={() => {
+                    handleDiamondPayment();
                     setShowModal(false);
+                    openLinkInWebView();
                   }}>
                   <ButtonText>Confirm</ButtonText>
                 </Button>
@@ -185,6 +159,26 @@ export default function Diamond() {
           </Modal>
         </Center>
       </View>
+      <Modal
+        padding={10}
+        isOpen={visiblePaymentModal}
+        onClose={() => setVisiblePaymentModal(false)}>
+        <ModalContent width={'100%'} alignItems="center">
+          <ModalBody width={'110%'}>
+            <WebView source={{uri: WEB_PAGE_URL}} height={500} width={'100%'} />
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              variant="outline"
+              size="sm"
+              action="secondary"
+              mr="$3"
+              onPress={() => setVisiblePaymentModal(false)}>
+              <ButtonText>Close</ButtonText>
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </View>
   );
 }
