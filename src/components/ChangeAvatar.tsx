@@ -14,45 +14,25 @@ import {
   View,
   Text,
 } from '@gluestack-ui/themed';
-import React, {useState} from 'react';
-import ListAllAvatar from './ListAllAvatar';
-import {useDispatch, useSelector} from 'react-redux';
-import {UPDATE_AVATAR} from '../store/slice/AuthSlice';
-import {API} from '../libs/api';
-import {RootState} from '../store/type/RootState';
-import {useAuth} from '../hooks/useAuth';
-import UnownAvatars from '../feature/avatar/UnownAvatars';
+import React, {useEffect, useState} from 'react';
 import AccordionComponent from './Accordion';
 
-export default function ChangeAvatar({navigation}: any) {
+export default function ChangeAvatar({
+  handleAvatarClick,
+  selectedAvatar,
+  handleBuyAvatar,
+  handleUpdateAvatar,
+}: any) {
   const [showModal, setShowModal] = useState(false);
   const ref = React.useRef(null);
-  const dispatch = useDispatch();
-  const auth = useSelector((state: RootState) => state.auth);
-  const [selectedAvatarId, setSelectedAvatarId] = useState<any>(null);
-  const handleAvatarClick = (avatarId: any) => {
-    setSelectedAvatarId(avatarId);
+  const [activeTab, setActiveTab] = useState('listAllAvatar');
+  const toggleTab = (tab: any) => {
+    setActiveTab(activeTab === tab ? null : tab);
   };
-  async function handleUpdateAvatar() {
-    try {
-      const dataToSend = {
-        avatar: selectedAvatarId,
-      };
-      const headers = {
-        Authorization: `Bearer ${auth.token}`,
-      };
 
-      const response = await API.patch('/user', dataToSend, {headers});
-      console.log('Success change avatar');
-      dispatch(
-        UPDATE_AVATAR({
-          avatar: response.data.data.avatar,
-        }),
-      );
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  useEffect(() => {
+    setActiveTab('listAllAvatar');
+  }, []);
 
   return (
     <Center h={300}>
@@ -92,7 +72,9 @@ export default function ChangeAvatar({navigation}: any) {
               <View height={400}>
                 <AccordionComponent
                   handleAvatarClick={handleAvatarClick}
-                  selectedAvatarId={selectedAvatarId}
+                  selectedAvatar={selectedAvatar}
+                  activeTab={activeTab}
+                  toggleTab={toggleTab}
                 />
               </View>
             </View>
@@ -108,19 +90,36 @@ export default function ChangeAvatar({navigation}: any) {
               }}>
               <ButtonText>Cancel</ButtonText>
             </Button>
-            <Button
-              size="sm"
-              backgroundColor="#12486B"
-              $active-bgColor="#001524"
-              width={80}
-              action="positive"
-              borderWidth="$0"
-              onPress={() => {
-                setShowModal(false);
-                handleUpdateAvatar();
-              }}>
-              <ButtonText>Buy</ButtonText>
-            </Button>
+
+            {activeTab === 'listAllAvatar' ? (
+              <Button
+                size="sm"
+                backgroundColor="#12486B"
+                $active-bgColor="#001524"
+                width={80}
+                action="positive"
+                borderWidth="$0"
+                onPress={() => {
+                  setShowModal(false);
+                  handleUpdateAvatar();
+                }}>
+                <ButtonText>Use</ButtonText>
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                backgroundColor="#12486B"
+                $active-bgColor="#001524"
+                width={80}
+                action="positive"
+                borderWidth="$0"
+                onPress={() => {
+                  setShowModal(false);
+                  handleBuyAvatar();
+                }}>
+                <ButtonText>Buy</ButtonText>
+              </Button>
+            )}
           </ModalFooter>
         </ModalContent>
       </Modal>

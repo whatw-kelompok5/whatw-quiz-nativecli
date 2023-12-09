@@ -2,8 +2,12 @@ import React, {useEffect, useState} from 'react';
 import {View, Avatar, AvatarImage, Button, Text} from '@gluestack-ui/themed';
 import {useAvatar} from '../hooks/useAvatar';
 import LoadingAvatar from '../feature/loading/LoadingAvatar';
+import {useSelector} from 'react-redux';
+import {RootState} from '../store/type/RootState';
 
-const ListAllAvatar = ({handleAvatarClick, selectedAvatarId}: any) => {
+const ListAllAvatar = ({handleAvatarClick, selectedAvatar}: any) => {
+  const auth = useSelector((state: RootState) => state.auth);
+
   const {AvatarsUser} = useAvatar();
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
@@ -25,6 +29,8 @@ const ListAllAvatar = ({handleAvatarClick, selectedAvatarId}: any) => {
     }
   }
 
+  useEffect(() => {}, [AvatarsUser, auth]);
+
   return isLoading ? (
     <LoadingAvatar />
   ) : (
@@ -43,9 +49,7 @@ const ListAllAvatar = ({handleAvatarClick, selectedAvatarId}: any) => {
               display="flex"
               flexDirection="column"
               $active={{bgColor: '#12486B'}}
-              bgColor={
-                selectedAvatarId === avatar.id ? '#12486B' : 'transparent'
-              }
+              bgColor={selectedAvatar.id === avatar.id ? '#12486B' : 'transparent'}
               width={60}
               height={85}
               style={{
@@ -56,14 +60,14 @@ const ListAllAvatar = ({handleAvatarClick, selectedAvatarId}: any) => {
                     ? 'auto'
                     : undefined,
               }}
-              onPress={() => handleAvatarClick(avatar.id)}>
+              onPress={() => handleAvatarClick(avatar)}>
               <Avatar bgColor="transparent" size="md" borderRadius="$full">
                 <AvatarImage source={{uri: avatar.image}} />
               </Avatar>
               <Text
                 fontSize="$xs"
                 width="200%"
-                color={selectedAvatarId === avatar.id ? 'white' : 'black'}
+                color={selectedAvatar.id === avatar.id ? 'white' : 'black'}
                 $active={{color: 'white'}}>
                 {avatar.owned === true ? 'owned' : avatar.price}
               </Text>

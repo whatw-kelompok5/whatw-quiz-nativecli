@@ -5,7 +5,7 @@ import {AvatarType, AvatarUser} from '../types/Avatar';
 export function useAvatar() {
   const {data: Avatars, isPending} = useQuery<AvatarType>({
     queryKey: ['avatar'],
-    queryFn: async () => await API_GOLANG.get('/avatars').then(res => res.data),
+    queryFn: async () => await API.get('/avatars').then(res => res.data),
   });
   const {data: AvatarsUser} = useQuery<any>({
     queryKey: ['useravatars'],

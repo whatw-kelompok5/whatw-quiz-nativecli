@@ -38,7 +38,7 @@ const Matching = ({navigation}: any) => {
   }, [isLoading, navigation]);
 
   useEffect(() => {
-    const socket = io('http://192.168.18.107:3000');
+    const socket = io('http://192.168.18.249:3000');
     // const socket = io('http://192.168.100.7:5000');
 
     socket.on('connect', () => {

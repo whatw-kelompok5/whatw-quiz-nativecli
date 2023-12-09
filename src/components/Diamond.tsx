@@ -20,14 +20,17 @@ import ListDiamond from './ListDiamond';
 import Diamonds from '../mocks/diamond';
 import {API} from '../libs/api';
 import WebView from 'react-native-webview';
+import {Alert} from 'react-native';
 
-export default function Diamond() {
+export default function Diamond({userDiamonds}: any) {
   const auth = useSelector((state: RootState) => state.auth);
   const [showModal, setShowModal] = useState(false);
   const ref = React.useRef(null);
   const [selectedDiamondId, setSelectedDiamondId] = useState<any>(null);
   const [responseUrl, setResponseUrl] = useState<any>('');
   const [visiblePaymentModal, setVisiblePaymentModal] = React.useState(false);
+  const [loading, setLoading] = useState(false);
+  const [orderID, setOrderID] = useState<any>('');
 
   const handleDiamondClick = (diamondId: any) => {
     setSelectedDiamondId(diamondId);
@@ -46,18 +49,55 @@ export default function Diamond() {
           quantity,
         };
         console.log(dataToSend);
-        const response = await API.post('/midtrans/transaction', dataToSend);
+        const response = await API.post('/midtrans/transaction', {
+          ...dataToSend,
+          email: auth.email,
+          fullname: auth.fullname,
+        });
+
+        setOrderID(response.data.data.orderId);
         setResponseUrl(response.data.data.payment_url);
+
+        console.log(response.data);
+
+        openLinkInWebView();
       }
     } catch (error) {
       console.log(error);
     }
   }
 
+  async function getstatus() {
+    const url = `https://api.sandbox.midtrans.com/v2/${orderID}/status`;
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.json();
+  }
+
+  function checkPayment() {
+    setLoading(true);
+    getstatus().then(data => {
+      if (data.status_code == 200) {
+        console.log(data);
+        setLoading(false);
+        Alert.alert('This Order ID has been paid');
+        setVisiblePaymentModal(false);
+      } else {
+        console.log(data);
+        setLoading(false);
+        Alert.alert('This Order ID has not been paid');
+      }
+    });
+  }
+
   const WEB_PAGE_URL = responseUrl;
   const openLinkInWebView = () => setVisiblePaymentModal(true);
-
-  console.log(responseUrl);
   return (
     <View>
       <View
@@ -83,7 +123,7 @@ export default function Diamond() {
           fontSize={15}
           fontWeight="bold"
           marginRight={8}>
-          {auth?.diamond}
+          {userDiamonds}
         </ButtonText>
         <Center h={300}>
           <Button
@@ -150,7 +190,6 @@ export default function Diamond() {
                   onPress={() => {
                     handleDiamondPayment();
                     setShowModal(false);
-                    openLinkInWebView();
                   }}>
                   <ButtonText>Confirm</ButtonText>
                 </Button>
@@ -163,18 +202,18 @@ export default function Diamond() {
         padding={10}
         isOpen={visiblePaymentModal}
         onClose={() => setVisiblePaymentModal(false)}>
-        <ModalContent width={'100%'} alignItems="center">
+        <ModalContent width={'100%'} alignItems="center" display="flex">
           <ModalBody width={'110%'}>
             <WebView source={{uri: WEB_PAGE_URL}} height={500} width={'100%'} />
           </ModalBody>
-          <ModalFooter>
+          <ModalFooter display="flex" justifyContent="flex-end" width={'100%'}>
             <Button
               variant="outline"
               size="sm"
               action="secondary"
               mr="$3"
               onPress={() => setVisiblePaymentModal(false)}>
-              <ButtonText>Close</ButtonText>
+              <ButtonText>Cancel</ButtonText>
             </Button>
           </ModalFooter>
         </ModalContent>

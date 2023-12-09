@@ -6,22 +6,26 @@ import UnownAvatars from '../feature/avatar/UnownAvatars';
 
 interface AccordionProps {
   handleAvatarClick: (avatarId: string) => void;
-  selectedAvatarId: string;
+  selectedAvatar: string;
+  activeTab: string;
+  toggleTab: (tab: string) => void;
 }
 
 export default function AccordionComponent({
   handleAvatarClick,
-  selectedAvatarId,
+  selectedAvatar,
+  activeTab,
+  toggleTab,
 }: AccordionProps) {
-  const [activeTab, setActiveTab] = useState('listAllAvatar');
+  // const [activeTab, setActiveTab] = useState('listAllAvatar');
 
-  const toggleTab = (tab: any) => {
-    setActiveTab(activeTab === tab ? null : tab);
-  };
+  // const toggleTab = (tab: any) => {
+  //   setActiveTab(activeTab === tab ? null : tab);
+  // };
 
-  useEffect(() => {
-    setActiveTab('listAllAvatar');
-  }, []);
+  // useEffect(() => {
+  //   setActiveTab('listAllAvatar');
+  // }, []);
 
   return (
     <View
@@ -64,7 +68,7 @@ export default function AccordionComponent({
           <View>
             <ListAllAvatar
               handleAvatarClick={handleAvatarClick}
-              selectedAvatarId={selectedAvatarId}
+              selectedAvatar={selectedAvatar}
             />
           </View>
         )}
@@ -72,7 +76,7 @@ export default function AccordionComponent({
           <View>
             <UnownAvatars
               handleAvatarClick={handleAvatarClick}
-              selectedAvatarId={selectedAvatarId}
+              selectedAvatar={selectedAvatar}
             />
           </View>
         )}

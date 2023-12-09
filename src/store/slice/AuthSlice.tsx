@@ -78,8 +78,19 @@ export const authSlice = createSlice({
         fullname,
       };
     },
+    UPDATE_DIAMOND: (state, action) => {
+      const {diamond} = action.payload;
+      return {
+        ...state,
+        diamond,
+      };
+    },
   },
 });
 
-export const {UPDATE_AVATAR_AND_FULLNAME, UPDATE_AVATAR, UPDATE_FULLNAME} =
-  authSlice.actions;
+export const {
+  UPDATE_AVATAR_AND_FULLNAME,
+  UPDATE_AVATAR,
+  UPDATE_FULLNAME,
+  UPDATE_DIAMOND,
+} = authSlice.actions;

@@ -12,9 +12,12 @@ import {Loading} from '../feature/loading/Loading';
 import {useDispatch} from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {AUTH_LOGIN} from '../store/RootReducer';
+import {API} from '../libs/api';
+import {UPDATE_AVATAR, UPDATE_DIAMOND} from '../store/slice/AuthSlice';
 
 export default function StartGameComponent({navigation}: any) {
   const [isLoading, setIsLoading] = useState(true);
+  const [diamondLoading, setDiamondLoading] = useState(false);
   const [userData, setUserData] = useState<any>(null);
   const dispatch = useDispatch();
 
@@ -58,7 +61,6 @@ export default function StartGameComponent({navigation}: any) {
         }),
       );
     }
-
     setAsyncStorage();
   }, [auth]);
 
@@ -71,6 +73,60 @@ export default function StartGameComponent({navigation}: any) {
       }, 3000);
     }
   }, [userData, auth]);
+
+  const [selectedAvatar, setSelectedAvatar] = useState<any>({
+    id: 0,
+    price: 0,
+  });
+
+  const handleAvatarClick = (avatar: any) => {
+    setSelectedAvatar({
+      id: avatar.id,
+      price: avatar.price,
+    });
+  };
+
+  async function handleUpdateAvatar() {
+    try {
+      const dataToSend = {
+        avatar: selectedAvatar.id,
+      };
+      const headers = {
+        Authorization: `Bearer ${auth.token}`,
+      };
+
+      const response = await API.patch('/user', dataToSend, {headers});
+      console.log('Success change avatar');
+      dispatch(
+        UPDATE_AVATAR({
+          avatar: response.data.data.avatar,
+        }),
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function handleBuyAvatar() {
+    try {
+      const dataToSend = {
+        avatarId: selectedAvatar.id,
+      };
+      const headers = {
+        Authorization: `Bearer ${auth.token}`,
+      };
+      const response = await API.post('/user/buyavatar', dataToSend, {headers});
+      console.log('Success buy avatar');
+      await handleUpdateAvatar();
+      dispatch(
+        UPDATE_DIAMOND({
+          diamond: auth.diamond - selectedAvatar.price,
+        }),
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   return isLoading ? (
     <Loading />
@@ -105,7 +161,7 @@ export default function StartGameComponent({navigation}: any) {
                 display="flex"
                 flexDirection="row"
                 gap={10}>
-                <Diamond />
+                <Diamond userDiamonds={auth.diamond} />
               </View>
             </View>
           </View>
@@ -146,7 +202,13 @@ export default function StartGameComponent({navigation}: any) {
               width={'100%'}
               left={50}
               zIndex={999}>
-              <ChangeAvatar />
+              <ChangeAvatar
+                handleAvatarClick={handleAvatarClick}
+                selectedAvatarId={selectedAvatar}
+                selectedAvatar={selectedAvatar}
+                handleUpdateAvatar={handleUpdateAvatar}
+                handleBuyAvatar={handleBuyAvatar}
+              />
             </View>
             <View top={250} alignItems="center" width={'100%'}>
               <Text
