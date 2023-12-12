@@ -12,54 +12,61 @@ import {
   View,
   Modal,
 } from '@gluestack-ui/themed';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import diamond from '../assets/diamond.png';
 import {useSelector} from 'react-redux';
 import {RootState} from '../store/type/RootState';
 import ListDiamond from './ListDiamond';
-import Diamonds from '../mocks/diamond';
 import {API} from '../libs/api';
 import WebView from 'react-native-webview';
 import {Alert} from 'react-native';
+import {useDiamond} from '../hooks/useDiamond';
+import {useDispatch} from 'react-redux';
+import {UPDATE_DIAMOND} from '../store/slice/AuthSlice';
+import {useAuth} from '../hooks/useAuth';
 
-export default function Diamond({userDiamonds}: any) {
-  const auth = useSelector((state: RootState) => state.auth);
+export default function Diamond({userDiamonds, navigation}: any) {
+  const {Users, handleLogin} = useAuth({navigation});
+  const dispatch = useDispatch();
+  const {Diamonds} = useDiamond();
+  const auth: any = useSelector((state: RootState) => state.auth);
   const [showModal, setShowModal] = useState(false);
   const ref = React.useRef(null);
   const [selectedDiamondId, setSelectedDiamondId] = useState<any>(null);
   const [responseUrl, setResponseUrl] = useState<any>('');
   const [visiblePaymentModal, setVisiblePaymentModal] = React.useState(false);
   const [loading, setLoading] = useState(false);
-  const [orderID, setOrderID] = useState<any>('');
+  const [orderId, setOrderId] = useState<any>('');
+  const [diamondUser, setDiamondUser] = useState<any>(null);
 
   const handleDiamondClick = (diamondId: any) => {
-    setSelectedDiamondId(diamondId);
+    const selectedDiamond: any = Diamonds.find(
+      (diamond: {id: any}) => diamond.id === diamondId,
+    );
+    setSelectedDiamondId(selectedDiamond);
   };
+
   async function handleDiamondPayment() {
     try {
       const selectedDiamond = Diamonds.find(
-        diamond => diamond.id === selectedDiamondId,
+        (diamond: {id: any}) => diamond.id === selectedDiamondId.id,
       );
       if (selectedDiamond) {
-        const {id, price, quantity} = selectedDiamond;
+        const {id, price} = selectedDiamond;
         const dataToSend = {
-          id,
-          name: 'diamond',
+          diamondId: id,
+          name: 'Diamond Package',
           price,
-          quantity,
+          quantity: 1,
         };
-        console.log(dataToSend);
-        const response = await API.post('/midtrans/transaction', {
+        const response = await API.post('/diamond/midtrans', {
           ...dataToSend,
           email: auth.email,
           fullname: auth.fullname,
         });
 
-        setOrderID(response.data.data.orderId);
-        setResponseUrl(response.data.data.payment_url);
-
-        console.log(response.data);
-
+        setOrderId(response.data.orderId);
+        setResponseUrl(response.data.redirect_url);
         openLinkInWebView();
       }
     } catch (error) {
@@ -67,33 +74,9 @@ export default function Diamond({userDiamonds}: any) {
     }
   }
 
-  async function getstatus() {
-    const url = `https://api.sandbox.midtrans.com/v2/${orderID}/status`;
-
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    });
-    return response.json();
-  }
-
-  function checkPayment() {
-    setLoading(true);
-    getstatus().then(data => {
-      if (data.status_code == 200) {
-        console.log(data);
-        setLoading(false);
-        Alert.alert('This Order ID has been paid');
-        setVisiblePaymentModal(false);
-      } else {
-        console.log(data);
-        setLoading(false);
-        Alert.alert('This Order ID has not been paid');
-      }
-    });
+  async function handleConfirmPayment() {
+    setVisiblePaymentModal(false);
+    await handleLogin();
   }
 
   const WEB_PAGE_URL = responseUrl;
@@ -212,8 +195,8 @@ export default function Diamond({userDiamonds}: any) {
               size="sm"
               action="secondary"
               mr="$3"
-              onPress={() => setVisiblePaymentModal(false)}>
-              <ButtonText>Cancel</ButtonText>
+              onPress={() => handleConfirmPayment()}>
+              <ButtonText>Close</ButtonText>
             </Button>
           </ModalFooter>
         </ModalContent>

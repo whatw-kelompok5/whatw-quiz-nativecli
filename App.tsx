@@ -16,6 +16,7 @@ import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import Setting from './src/feature/top/Setting';
 import {AppRegistry, LogBox} from 'react-native';
 import SocketIO from './src/screens/SocketIO';
+
 const queryClient = new QueryClient();
 AppRegistry.registerComponent('App', () => App);
 const Stack = createNativeStackNavigator();

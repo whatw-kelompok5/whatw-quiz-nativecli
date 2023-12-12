@@ -14,10 +14,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {AUTH_LOGIN} from '../store/RootReducer';
 import {API} from '../libs/api';
 import {UPDATE_AVATAR, UPDATE_DIAMOND} from '../store/slice/AuthSlice';
+import {useAuth} from '../hooks/useAuth';
 
 export default function StartGameComponent({navigation}: any) {
   const [isLoading, setIsLoading] = useState(true);
-  const [diamondLoading, setDiamondLoading] = useState(false);
+  const {Users} = useAuth({navigation});
+  const [diamondUser, setDiamondUser] = useState(null);
   const [userData, setUserData] = useState<any>(null);
   const dispatch = useDispatch();
 
@@ -46,7 +48,7 @@ export default function StartGameComponent({navigation}: any) {
     fetchData();
   }, []);
 
-  const auth = useSelector((state: RootState) => state.auth);
+  const auth: any = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
     async function setAsyncStorage() {
@@ -128,6 +130,8 @@ export default function StartGameComponent({navigation}: any) {
     }
   }
 
+
+
   return isLoading ? (
     <Loading />
   ) : (
@@ -161,7 +165,9 @@ export default function StartGameComponent({navigation}: any) {
                 display="flex"
                 flexDirection="row"
                 gap={10}>
-                <Diamond userDiamonds={auth.diamond} />
+                <Diamond
+                  userDiamonds={auth.diamond}
+                />
               </View>
             </View>
           </View>
